@@ -66,7 +66,7 @@ export async function POST(request: Request) {
         member_email: memberEmail,
         membership_type: membershipType,
       },
-      success_url: `${baseUrl}/membership?payment=success&member=${memberId}`,
+      success_url: `${baseUrl}/payment-success?member=${memberId}`,
       cancel_url: `${baseUrl}/membership?payment=cancelled&member=${memberId}`,
     });
 
