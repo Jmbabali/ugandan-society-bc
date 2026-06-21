@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  color: #111827;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Prevent pages from touching screen edges */
+main {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Better readable text */
+p {
+  line-height: 1.7;
+}
+
+/* Premium shadow */
+.shadow-premium {
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.10),
+    0 3px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* Better card hover */
+.card-hover {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background-color 0.25s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.14),
+    0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+/* Fix input appearance */
+input,
+textarea,
+select {
+  color: #111827;
+  background-color: #ffffff;
+}
+
+/* Better button cursor */
+button,
+a {
+  cursor: pointer;
+}
