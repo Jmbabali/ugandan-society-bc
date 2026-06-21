@@ -17,39 +17,55 @@ export default function MembershipPage() {
 
   const [photo, setPhoto] = useState<File | null>(null);
   const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   }
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files && e.target.files[0]) {
-      setPhoto(e.target.files[0]);
-    }
+    if (e.target.files && e.target.files[0]) setPhoto(e.target.files[0]);
   }
 
   function getPaymentAmount(membershipType: string) {
-    switch (membershipType) {
-      case "Adults - $50":
-        return 50;
-      case "Student Member - $30":
-        return 30;
-      case "Corporate / Partner - $200":
-        return 200;
-      case "Honorary - $0":
-        return 0;
-      default:
-        return 0;
+    if (membershipType === "Adults - $50") return 50;
+    if (membershipType === "Student Member - $30") return 30;
+    if (membershipType === "Corporate / Partner - $200") return 200;
+    if (membershipType === "Honorary - $0") return 0;
+    return 0;
+  }
+
+  async function startStripeCheckout(memberId: string, paymentAmount: number) {
+    const response = await fetch("/api/create-checkout-session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        membershipType: formData.membershipType,
+        memberName: `${formData.firstName} ${formData.lastName}`,
+        memberEmail: formData.email,
+        memberId,
+        amount: paymentAmount,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.url) {
+      setMessage(data.error || "Could not start online payment.");
+      setSubmitting(false);
+      return;
     }
+
+    window.location.href = data.url;
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setSubmitting(true);
     setMessage("Submitting application...");
 
     let photoUrl = "";
@@ -67,6 +83,7 @@ export default function MembershipPage() {
 
       if (uploadError) {
         setMessage(uploadError.message);
+        setSubmitting(false);
         return;
       }
 
@@ -92,21 +109,26 @@ export default function MembershipPage() {
       emergency_contact: formData.emergencyContact,
       photo_url: photoUrl,
       status: "Pending",
-      payment_status: paymentAmount === 0 ? "Not Required" : "Unpaid",
+      payment_status: paymentAmount === 0 ? "Not Required" : "Pending Online Payment",
       payment_amount: paymentAmount,
-      payment_method: paymentAmount === 0 ? "Not Required" : null,
+      payment_method: paymentAmount === 0 ? "Not Required" : "Stripe",
       payment_date: null,
       stripe_session_id: null,
     });
 
     if (error) {
       setMessage(error.message);
+      setSubmitting(false);
       return;
     }
 
-    setMessage(
-      "Application submitted successfully. Please complete payment by e-Transfer if applicable."
-    );
+    if (paymentAmount > 0) {
+      setMessage("Application submitted. Redirecting to secure payment...");
+      await startStripeCheckout(temporaryMemberId, paymentAmount);
+      return;
+    }
+
+    setMessage("Application submitted successfully. No payment is required for this membership type.");
 
     setFormData({
       firstName: "",
@@ -120,16 +142,13 @@ export default function MembershipPage() {
     });
 
     setPhoto(null);
+    setSubmitting(false);
   }
 
   const membershipTypes = [
     ["Adults", "$50", "One adult member"],
     ["Student Member", "$30", "Full-time student with ID"],
-    [
-      "Corporate / Partner",
-      "$200",
-      "Business or organization supporting the mission",
-    ],
+    ["Corporate / Partner", "$200", "Business or organization supporting the mission"],
     ["Honorary", "$0", "Awarded by the Board"],
   ];
 
@@ -173,25 +192,14 @@ export default function MembershipPage() {
 
           <div className="grid gap-6 md:grid-cols-4">
             {membershipTypes.map(([type, fee, desc]) => (
-              <div
-                key={type}
-                className="rounded-3xl border bg-white p-8 shadow-premium"
-              >
-                <h3 className="mb-3 text-2xl font-black text-gray-950">
-                  {type}
-                </h3>
-
+              <div key={type} className="rounded-3xl border bg-white p-8 shadow-premium">
+                <h3 className="mb-3 text-2xl font-black text-gray-950">{type}</h3>
                 <p className="mb-6 text-gray-700">{desc}</p>
-
                 <p className="mb-8 text-5xl font-black text-gray-950">
                   {fee}
                   <span className="text-base font-normal"> / year</span>
                 </p>
-
-                <a
-                  href="#application"
-                  className="block rounded-xl bg-gray-950 px-6 py-4 text-center font-bold text-white hover:bg-gray-800"
-                >
+                <a href="#application" className="block rounded-xl bg-gray-950 px-6 py-4 text-center font-bold text-white hover:bg-gray-800">
                   Apply Now
                 </a>
               </div>
@@ -212,8 +220,7 @@ export default function MembershipPage() {
             </h2>
 
             <p className="mb-8 text-lg text-gray-700">
-              Complete the form. Your application will be added to the USBC
-              membership database with status set to Pending.
+              Complete the form. Paid memberships will continue to secure online payment after submission.
             </p>
 
             <div className="rounded-3xl bg-gray-950 p-8 text-white shadow-premium">
@@ -223,99 +230,28 @@ export default function MembershipPage() {
 
               <div className="space-y-4 text-gray-300">
                 <p>1. Submit application</p>
-                <p>2. Send membership fee by e-Transfer</p>
+                <p>2. Pay membership fee securely online</p>
                 <p>3. USBC confirms payment</p>
                 <p>4. USBC reviews and approves application</p>
                 <p>5. Official USBC member ID is issued after approval</p>
               </div>
             </div>
-
-            <div className="mt-8 rounded-3xl border-2 border-yellow-400 bg-yellow-50 p-8">
-              <h3 className="mb-3 text-2xl font-black text-gray-950">
-                E-Transfer Payment Instructions
-              </h3>
-
-              <p className="text-gray-700">
-                After submitting your application, please send your membership
-                fee by Interac e-Transfer to:
-              </p>
-
-              <p className="mt-4 break-all text-2xl font-black text-red-600">
-                ugandansocietybc@gmail.com
-              </p>
-
-              <p className="mt-4 text-gray-700">
-                Include your full name and membership type in the transfer
-                message so USBC can match your payment to your application.
-              </p>
-
-              <p className="mt-4 font-bold text-gray-950">
-                Your membership will remain pending until payment is confirmed.
-              </p>
-            </div>
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-6 rounded-3xl border bg-gray-50 p-8 shadow-premium md:p-10"
-          >
+          <form onSubmit={handleSubmit} className="space-y-6 rounded-3xl border bg-gray-50 p-8 shadow-premium md:p-10">
             <div className="grid gap-6 md:grid-cols-2">
-              <input
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                required
-                placeholder="First Name"
-                className="rounded-xl border px-4 py-4 text-gray-950"
-              />
-
-              <input
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                required
-                placeholder="Last Name"
-                className="rounded-xl border px-4 py-4 text-gray-950"
-              />
+              <input name="firstName" value={formData.firstName} onChange={handleChange} required placeholder="First Name" className="rounded-xl border px-4 py-4 text-gray-950" />
+              <input name="lastName" value={formData.lastName} onChange={handleChange} required placeholder="Last Name" className="rounded-xl border px-4 py-4 text-gray-950" />
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
-              <input
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                type="email"
-                placeholder="Email Address"
-                className="rounded-xl border px-4 py-4 text-gray-950"
-              />
-
-              <input
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-                placeholder="Phone Number"
-                className="rounded-xl border px-4 py-4 text-gray-950"
-              />
+              <input name="email" value={formData.email} onChange={handleChange} required type="email" placeholder="Email Address" className="rounded-xl border px-4 py-4 text-gray-950" />
+              <input name="phone" value={formData.phone} onChange={handleChange} required placeholder="Phone Number" className="rounded-xl border px-4 py-4 text-gray-950" />
             </div>
 
-            <input
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              required
-              placeholder="Full Address"
-              className="w-full rounded-xl border px-4 py-4 text-gray-950"
-            />
+            <input name="address" value={formData.address} onChange={handleChange} required placeholder="Full Address" className="w-full rounded-xl border px-4 py-4 text-gray-950" />
 
-            <select
-              name="membershipType"
-              value={formData.membershipType}
-              onChange={handleChange}
-              required
-              className="w-full rounded-xl border px-4 py-4 text-gray-950"
-            >
+            <select name="membershipType" value={formData.membershipType} onChange={handleChange} required className="w-full rounded-xl border px-4 py-4 text-gray-950">
               <option value="">Select Membership Type</option>
               <option>Adults - $50</option>
               <option>Student Member - $30</option>
@@ -323,13 +259,7 @@ export default function MembershipPage() {
               <option>Honorary - $0</option>
             </select>
 
-            <select
-              name="memberCategory"
-              value={formData.memberCategory}
-              onChange={handleChange}
-              required
-              className="w-full rounded-xl border px-4 py-4 text-gray-950"
-            >
+            <select name="memberCategory" value={formData.memberCategory} onChange={handleChange} required className="w-full rounded-xl border px-4 py-4 text-gray-950">
               <option value="">Select Member Category</option>
               <option>General Member</option>
               <option>Executive Committee</option>
@@ -339,26 +269,14 @@ export default function MembershipPage() {
               <option>Student Member</option>
             </select>
 
-            <input
-              name="emergencyContact"
-              value={formData.emergencyContact}
-              onChange={handleChange}
-              placeholder="Emergency Contact"
-              className="w-full rounded-xl border px-4 py-4 text-gray-950"
-            />
+            <input name="emergencyContact" value={formData.emergencyContact} onChange={handleChange} placeholder="Emergency Contact" className="w-full rounded-xl border px-4 py-4 text-gray-950" />
 
             <div>
               <label className="mb-2 block text-sm font-bold text-gray-700">
                 Upload Photo for Membership ID
               </label>
 
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoChange}
-                required
-                className="w-full rounded-xl border bg-white px-4 py-4 text-gray-950"
-              />
+              <input type="file" accept="image/*" onChange={handlePhotoChange} required className="w-full rounded-xl border bg-white px-4 py-4 text-gray-950" />
             </div>
 
             <div className="rounded-2xl border-2 border-yellow-400 bg-yellow-50 p-5">
@@ -367,21 +285,11 @@ export default function MembershipPage() {
               </h3>
 
               <p className="text-gray-700">
-                After submitting your application, please send your membership
-                fee by Interac e-Transfer to:
-              </p>
-
-              <p className="mt-3 break-all text-lg font-black text-red-600">
-                ugandansocietybc@gmail.com
-              </p>
-
-              <p className="mt-3 text-sm text-gray-700">
-                Include your full name and membership type in the transfer
-                message.
+                Paid memberships will be redirected to secure online payment after submitting the application.
               </p>
 
               <p className="mt-3 text-sm font-bold text-gray-950">
-                Your membership will remain pending until payment is confirmed.
+                Honorary membership requires no payment.
               </p>
             </div>
 
@@ -397,16 +305,12 @@ export default function MembershipPage() {
             <label className="flex gap-3 text-sm text-gray-700">
               <input type="checkbox" className="mt-1" />
               <span>
-                I consent to receive email updates, newsletters, and event
-                notices from USBC.
+                I consent to receive email updates, newsletters, and event notices from USBC.
               </span>
             </label>
 
-            <button
-              type="submit"
-              className="w-full rounded-xl bg-gray-950 px-8 py-4 font-bold text-white hover:bg-gray-800"
-            >
-              Submit Application
+            <button type="submit" disabled={submitting} className="w-full rounded-xl bg-gray-950 px-8 py-4 font-bold text-white hover:bg-gray-800 disabled:opacity-60">
+              {submitting ? "Processing..." : "Submit Application & Continue to Payment"}
             </button>
 
             {message && (

@@ -1,70 +1,81 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 function getMembershipPrice(membershipType: string) {
-  if (membershipType === "Adults") return 5000;
-  if (membershipType === "Student member") return 3000;
-  if (membershipType === "Corporate/Partner") return 20000;
-  if (membershipType === "Honorary") return 0;
-
+  if (membershipType === "Adults - $50") return 50;
+  if (membershipType === "Student Member - $30") return 30;
+  if (membershipType === "Corporate / Partner - $200") return 200;
+  if (membershipType === "Honorary - $0") return 0;
   return 0;
+}
+
+export async function GET() {
+  return NextResponse.json(
+    { message: "Stripe checkout route is working. Use POST to create a session." },
+    { status: 405 }
+  );
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const {
-      membershipType,
-      memberName,
-      memberEmail,
-      memberId,
-    } = body;
+    const { membershipType, memberName, memberEmail, memberId } = body;
 
     const amount = getMembershipPrice(membershipType);
 
-    if (!amount) {
+    if (!membershipType || !memberName || !memberEmail || !memberId) {
       return NextResponse.json(
-        { error: "No payment required for this membership type." },
+        { error: "Missing required membership payment details." },
         { status: 400 }
       );
     }
 
-    const checkoutSession = await stripe.checkout.sessions.create({
-      mode: "payment",
+    if (amount <= 0) {
+      return NextResponse.json(
+        { error: "This membership type does not require payment." },
+        { status: 400 }
+      );
+    }
+
+    const baseUrl =
+      process.env.NEXT_PUBLIC_SITE_URL || "https://ugandansocietybc.ca";
+
+    const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
+      mode: "payment",
       customer_email: memberEmail,
       line_items: [
         {
           price_data: {
             currency: "cad",
             product_data: {
-              name: `USBC ${membershipType} Membership`,
-              description: `Membership payment for ${memberName}`,
+              name: `USBC Membership - ${membershipType}`,
+              description: `Membership fee for ${memberName}`,
             },
-            unit_amount: amount,
+            unit_amount: amount * 100,
           },
           quantity: 1,
         },
       ],
       metadata: {
-        member_id: memberId || "",
-        member_name: memberName || "",
-        member_email: memberEmail || "",
-        membership_type: membershipType || "",
+        member_id: memberId,
+        member_name: memberName,
+        member_email: memberEmail,
+        membership_type: membershipType,
       },
-      success_url: `${request.headers.get(
-        "origin"
-      )}/membership/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${request.headers.get("origin")}/membership`,
+      success_url: `${baseUrl}/membership?payment=success&member=${memberId}`,
+      cancel_url: `${baseUrl}/membership?payment=cancelled&member=${memberId}`,
     });
 
-    return NextResponse.json({ url: checkoutSession.url });
-  } catch (error: any) {
+    return NextResponse.json({ url: session.url });
+  } catch (error) {
+    console.error("Stripe Checkout Error:", error);
+
     return NextResponse.json(
-      { error: error.message || "Stripe checkout error." },
+      { error: "Unable to create Stripe checkout session." },
       { status: 500 }
     );
   }
