@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 type Member = {
@@ -93,6 +94,16 @@ export default function MemberDashboardPage() {
     return 0;
   }
 
+  function getDaysRemaining(expiryDate: string) {
+    if (!expiryDate) return 0;
+
+    const today = new Date();
+    const expiry = new Date(expiryDate);
+    const difference = expiry.getTime() - today.getTime();
+
+    return Math.ceil(difference / (1000 * 60 * 60 * 24));
+  }
+
   async function requestRenewal() {
     if (!member) return;
 
@@ -101,13 +112,13 @@ export default function MemberDashboardPage() {
       return;
     }
 
-    const confirmed = window.confirm(
-      "Submit a membership renewal request?"
-    );
+    const confirmed = window.confirm("Submit a membership renewal request?");
 
     if (!confirmed) return;
 
     setMessage("Submitting renewal request...");
+
+    const renewalAmount = getRenewalAmount(member.membership_type);
 
     const { error } = await supabase.from("RenewalRequests").insert({
       member_id: member.member_id,
@@ -117,14 +128,8 @@ export default function MemberDashboardPage() {
       current_expiry_date: member.expiry_date,
       requested_at: new Date().toISOString(),
       status: "Pending",
-      payment_status:
-        getRenewalAmount(member.membership_type) === 0
-          ? "Not Required"
-          : "Unpaid",
-      payment_method:
-        getRenewalAmount(member.membership_type) === 0
-          ? "Not Required"
-          : "E-Transfer",
+      payment_status: renewalAmount === 0 ? "Not Required" : "Unpaid",
+      payment_method: renewalAmount === 0 ? "Not Required" : "E-Transfer",
       payment_date: null,
       approved_at: null,
       notes: null,
@@ -190,19 +195,25 @@ export default function MemberDashboardPage() {
   if (!member) return null;
 
   const renewalAmount = getRenewalAmount(member.membership_type);
+  const daysRemaining = getDaysRemaining(member.expiry_date);
 
   return (
     <main className="min-h-screen bg-gray-100 px-6 py-20">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-10 flex items-center justify-between">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="mb-2 font-bold uppercase tracking-widest text-red-600">
               USBC Member Area
             </p>
 
-            <h1 className="text-5xl font-black text-gray-950">
-              Member Portal
+            <h1 className="text-4xl font-black text-gray-950 md:text-6xl">
+              Welcome, {member.first_name}
             </h1>
+
+            <p className="mt-3 text-lg text-gray-700">
+              Manage your membership, view your card, renew your membership, and
+              access USBC community services.
+            </p>
           </div>
 
           <button
@@ -213,126 +224,214 @@ export default function MemberDashboardPage() {
           </button>
         </div>
 
-        <div className="mb-8 grid gap-4 md:grid-cols-4">
-          <div className="rounded-3xl bg-white p-6 shadow">
-            <p className="text-sm font-bold uppercase text-gray-500">Status</p>
-            <p className="text-2xl font-black text-gray-950">
-              {member.status}
-            </p>
-          </div>
-
-          <div className="rounded-3xl bg-white p-6 shadow">
-            <p className="text-sm font-bold uppercase text-gray-500">Payment</p>
-            <p className="text-2xl font-black text-gray-950">
-              {member.payment_status}
-            </p>
-          </div>
-
-          <div className="rounded-3xl bg-white p-6 shadow">
-            <p className="text-sm font-bold uppercase text-gray-500">Issued</p>
-            <p className="font-black text-gray-950">{member.issue_date}</p>
-          </div>
-
-          <div className="rounded-3xl bg-white p-6 shadow">
-            <p className="text-sm font-bold uppercase text-gray-500">Expires</p>
-            <p className="font-black text-gray-950">{member.expiry_date}</p>
-          </div>
-        </div>
-
         {message && (
           <p className="mb-8 rounded-xl bg-yellow-100 p-4 font-bold text-gray-950">
             {message}
           </p>
         )}
 
-        <div className="mb-8 rounded-3xl bg-white p-8 shadow">
-          <h2 className="mb-6 text-3xl font-black text-gray-950">
-            Membership Card
-          </h2>
+        <div className="mb-8 grid gap-4 md:grid-cols-5">
+          <div className="rounded-3xl bg-gray-950 p-6 text-white shadow">
+            <p className="text-sm font-bold uppercase text-gray-300">
+              Member ID
+            </p>
+            <p className="mt-2 text-2xl font-black">{member.member_id}</p>
+          </div>
 
-          <a
-            href={`/member-card/${member.member_id}`}
-            target="_blank"
-            className="inline-block rounded-xl bg-gray-950 px-6 py-4 font-bold text-white hover:bg-gray-800"
+          <div className="rounded-3xl bg-white p-6 shadow">
+            <p className="text-sm font-bold uppercase text-gray-500">Status</p>
+            <p className="mt-2 text-2xl font-black text-green-700">
+              {member.status}
+            </p>
+          </div>
+
+          <div className="rounded-3xl bg-white p-6 shadow">
+            <p className="text-sm font-bold uppercase text-gray-500">Payment</p>
+            <p className="mt-2 text-2xl font-black text-gray-950">
+              {member.payment_status}
+            </p>
+          </div>
+
+          <div className="rounded-3xl bg-white p-6 shadow">
+            <p className="text-sm font-bold uppercase text-gray-500">Expires</p>
+            <p className="mt-2 font-black text-gray-950">
+              {member.expiry_date}
+            </p>
+          </div>
+
+          <div
+            className={`rounded-3xl p-6 shadow ${
+              daysRemaining <= 30 ? "bg-yellow-50" : "bg-white"
+            }`}
           >
-            View Membership Card
-          </a>
+            <p className="text-sm font-bold uppercase text-gray-500">
+              Days Left
+            </p>
+            <p
+              className={`mt-2 text-3xl font-black ${
+                daysRemaining <= 30 ? "text-yellow-700" : "text-gray-950"
+              }`}
+            >
+              {daysRemaining}
+            </p>
+          </div>
         </div>
 
-        <div className="mb-8 rounded-3xl border-2 border-yellow-400 bg-yellow-50 p-8 shadow">
-          <h2 className="mb-4 text-3xl font-black text-gray-950">
-            Membership Renewal
+        <div className="mb-8 rounded-3xl border bg-white p-8 shadow-premium">
+          <h2 className="mb-6 text-3xl font-black text-gray-950">
+            Quick Actions
           </h2>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <p className="text-sm font-bold uppercase text-gray-500">
-                Membership Type
-              </p>
-              <p className="text-xl font-black text-gray-950">
-                {member.membership_type}
-              </p>
-            </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <a
+              href={`/member-card/${member.member_id}`}
+              target="_blank"
+              className="rounded-2xl bg-gray-950 p-6 text-center font-bold text-white hover:bg-gray-800"
+            >
+              View Membership Card
+            </a>
 
-            <div>
-              <p className="text-sm font-bold uppercase text-gray-500">
-                Renewal Fee
-              </p>
-              <p className="text-xl font-black text-gray-950">
-                ${renewalAmount}
-              </p>
+            <button
+              onClick={requestRenewal}
+              className="rounded-2xl bg-yellow-400 p-6 text-center font-bold text-black hover:bg-yellow-300"
+            >
+              Renew Membership
+            </button>
+
+            <Link
+              href="/events"
+              className="rounded-2xl bg-white p-6 text-center font-bold text-gray-950 shadow hover:bg-gray-50"
+            >
+              Register for Events
+            </Link>
+
+            <Link
+              href="/community-updates"
+              className="rounded-2xl bg-white p-6 text-center font-bold text-gray-950 shadow hover:bg-gray-50"
+            >
+              Community Updates
+            </Link>
+
+            <Link
+              href="/gallery"
+              className="rounded-2xl bg-white p-6 text-center font-bold text-gray-950 shadow hover:bg-gray-50"
+            >
+              Gallery
+            </Link>
+
+            <Link
+              href="/business-hub"
+              className="rounded-2xl bg-white p-6 text-center font-bold text-gray-950 shadow hover:bg-gray-50"
+            >
+              Business Hub
+            </Link>
+          </div>
+        </div>
+
+        <div className="mb-8 grid gap-8 lg:grid-cols-2">
+          <div className="rounded-3xl bg-white p-8 shadow">
+            <h2 className="mb-6 text-3xl font-black text-gray-950">
+              Membership Details
+            </h2>
+
+            <div className="grid gap-4">
+              <div className="rounded-2xl bg-gray-50 p-5">
+                <p className="text-sm font-bold uppercase text-gray-500">
+                  Full Name
+                </p>
+                <p className="mt-1 text-xl font-black text-gray-950">
+                  {member.first_name} {member.last_name}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-gray-50 p-5">
+                <p className="text-sm font-bold uppercase text-gray-500">
+                  Membership Type
+                </p>
+                <p className="mt-1 text-xl font-black text-gray-950">
+                  {member.membership_type}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-gray-50 p-5">
+                <p className="text-sm font-bold uppercase text-gray-500">
+                  Issue Date
+                </p>
+                <p className="mt-1 text-xl font-black text-gray-950">
+                  {member.issue_date}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-gray-50 p-5">
+                <p className="text-sm font-bold uppercase text-gray-500">
+                  Expiry Date
+                </p>
+                <p className="mt-1 text-xl font-black text-gray-950">
+                  {member.expiry_date}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="mt-6 rounded-2xl bg-white p-5">
-            <p className="font-bold text-gray-950">
-              E-Transfer Payment Instructions
-            </p>
+          <div className="rounded-3xl border-2 border-yellow-400 bg-yellow-50 p-8 shadow">
+            <h2 className="mb-6 text-3xl font-black text-gray-950">
+              Renewal Status
+            </h2>
 
-            <p className="mt-2 text-gray-700">
-              Send renewal payment to:
-            </p>
+            <div className="grid gap-4">
+              <div className="rounded-2xl bg-white p-5">
+                <p className="text-sm font-bold uppercase text-gray-500">
+                  Renewal Fee
+                </p>
+                <p className="mt-1 text-3xl font-black text-gray-950">
+                  ${renewalAmount}
+                </p>
+              </div>
 
-            <p className="mt-2 break-all text-lg font-black text-red-600">
-              ugandansocietybc@gmail.com
-            </p>
+              <div className="rounded-2xl bg-white p-5">
+                <p className="font-bold text-gray-950">
+                  E-Transfer Payment Instructions
+                </p>
 
-            <p className="mt-2 text-sm text-gray-700">
-              Include your full name and Member ID in the transfer message.
-            </p>
-          </div>
+                <p className="mt-2 text-gray-700">Send renewal payment to:</p>
 
-          {renewalRequest ? (
-            <div className="mt-6 rounded-2xl bg-white p-5">
-              <p className="text-sm font-bold uppercase text-gray-500">
-                Latest Renewal Request
-              </p>
+                <p className="mt-2 break-all text-lg font-black text-red-600">
+                  ugandansocietybc@gmail.com
+                </p>
 
-              <p className="mt-2 font-black text-gray-950">
-                Status: {renewalRequest.status}
-              </p>
+                <p className="mt-2 text-sm text-gray-700">
+                  Include your full name and Member ID in the transfer message.
+                </p>
+              </div>
 
-              <p className="text-gray-700">
-                Payment: {renewalRequest.payment_status}
-              </p>
+              {renewalRequest ? (
+                <div className="rounded-2xl bg-white p-5">
+                  <p className="text-sm font-bold uppercase text-gray-500">
+                    Latest Renewal Request
+                  </p>
 
-              <p className="text-gray-700">
-                Requested:{" "}
-                {new Date(renewalRequest.requested_at).toLocaleDateString()}
-              </p>
+                  <p className="mt-2 font-black text-gray-950">
+                    Status: {renewalRequest.status}
+                  </p>
+
+                  <p className="text-gray-700">
+                    Payment: {renewalRequest.payment_status}
+                  </p>
+
+                  <p className="text-gray-700">
+                    Requested:{" "}
+                    {new Date(renewalRequest.requested_at).toLocaleDateString()}
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-2xl bg-white p-5">
+                  <p className="font-bold text-gray-950">
+                    No renewal request on file.
+                  </p>
+                </div>
+              )}
             </div>
-          ) : (
-            <p className="mt-6 text-gray-700">
-              You have no renewal request on file.
-            </p>
-          )}
-
-          <button
-            onClick={requestRenewal}
-            className="mt-6 rounded-xl bg-gray-950 px-6 py-4 font-bold text-white hover:bg-gray-800"
-          >
-            Request Membership Renewal
-          </button>
+          </div>
         </div>
 
         <div className="rounded-3xl bg-white p-8 shadow">

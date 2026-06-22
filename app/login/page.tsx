@@ -31,7 +31,7 @@ export default function LoginPage() {
       .select("*")
       .eq("member_id", memberId.trim())
       .eq("email", email.trim())
-      .eq("portal_access", true)
+      .eq("status", "Approved")
       .single();
 
     if (error || !data) {

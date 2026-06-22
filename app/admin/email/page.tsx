@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import emailjs from "@emailjs/browser";
 import { supabase } from "@/lib/supabase";
-import AdminNav from "@/app/components/AdminNav";
 
 type Member = {
   id: number;
@@ -59,21 +58,10 @@ export default function AdminEmailPage() {
   const filteredRecipients = members.filter((member) => {
     if (!member.email) return false;
 
-    if (recipientGroup === "Approved Members") {
-      return member.status === "Approved";
-    }
-
-    if (recipientGroup === "Paid Members") {
-      return member.payment_status === "Paid";
-    }
-
-    if (recipientGroup === "Unpaid Members") {
-      return member.payment_status !== "Paid";
-    }
-
-    if (recipientGroup === "Pending Members") {
-      return member.status === "Pending";
-    }
+    if (recipientGroup === "Approved Members") return member.status === "Approved";
+    if (recipientGroup === "Paid Members") return member.payment_status === "Paid";
+    if (recipientGroup === "Unpaid Members") return member.payment_status !== "Paid";
+    if (recipientGroup === "Pending Members") return member.status === "Pending";
 
     return true;
   });
@@ -140,10 +128,8 @@ export default function AdminEmailPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 px-6 py-20">
+    <main className="min-h-screen bg-gray-100 px-6 py-12">
       <div className="mx-auto max-w-5xl">
-        <AdminNav />
-
         <div className="mb-10">
           <p className="mb-4 font-bold uppercase tracking-widest text-red-600">
             USBC Admin
@@ -181,20 +167,14 @@ export default function AdminEmailPage() {
           <div className="rounded-3xl border bg-white p-6 shadow-premium">
             <p className="text-sm font-bold uppercase text-gray-500">Paid</p>
             <p className="mt-2 text-4xl font-black text-gray-950">
-              {
-                members.filter((member) => member.payment_status === "Paid")
-                  .length
-              }
+              {members.filter((member) => member.payment_status === "Paid").length}
             </p>
           </div>
 
           <div className="rounded-3xl border bg-white p-6 shadow-premium">
             <p className="text-sm font-bold uppercase text-gray-500">Unpaid</p>
             <p className="mt-2 text-4xl font-black text-red-600">
-              {
-                members.filter((member) => member.payment_status !== "Paid")
-                  .length
-              }
+              {members.filter((member) => member.payment_status !== "Paid").length}
             </p>
           </div>
 

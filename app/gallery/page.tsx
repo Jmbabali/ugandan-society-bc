@@ -1,150 +1,105 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+
+type Album = {
+  id: number;
+  title: string;
+  description: string | null;
+  cover_image: string | null;
+  event_date: string | null;
+  status: string;
+};
+
 export default function GalleryPage() {
-  const galleryAlbums = [
-    {
-      title: "Cultural Celebrations",
-      category: "Culture",
-      description:
-        "Moments from cultural events celebrating Ugandan heritage, food, music, dance, and traditions.",
-    },
-    {
-      title: "Community Gatherings",
-      category: "Community",
-      description:
-        "Photos from social gatherings, networking activities, family events, and community meetings.",
-    },
-    {
-      title: "Youth Programs",
-      category: "Youth",
-      description:
-        "Highlights from youth engagement, leadership activities, mentorship, and learning opportunities.",
-    },
-    {
-      title: "Sports & Fitness",
-      category: "Sports",
-      description:
-        "Community sports, fitness activities, friendly matches, and wellness events.",
-    },
-    {
-      title: "Newcomer Support",
-      category: "Outreach",
-      description:
-        "Community outreach and support initiatives for newcomers and families settling in British Columbia.",
-    },
-    {
-      title: "Partners & Sponsors",
-      category: "Partnerships",
-      description:
-        "Recognition moments with partners, sponsors, volunteers, and community supporters.",
-    },
-  ];
+  const [albums, setAlbums] = useState<Album[]>([]);
+
+  useEffect(() => {
+    loadAlbums();
+  }, []);
+
+  async function loadAlbums() {
+    const { data, error } = await supabase
+      .from("GalleryAlbums")
+      .select("*")
+      .eq("status", "Published")
+      .order("event_date", { ascending: false });
+
+    if (!error && data) {
+      setAlbums(data);
+    }
+  }
 
   return (
-    <main className="min-h-screen bg-white">
-      <section className="relative overflow-hidden bg-black px-6 py-28 text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(250,204,21,0.25),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(220,38,38,0.25),transparent_30%)]" />
-
-        <div className="relative max-w-7xl mx-auto">
-          <p className="text-yellow-400 uppercase tracking-widest font-semibold mb-4">
+    <main className="min-h-screen bg-gray-100">
+      <section className="bg-gray-950 px-6 pb-20 pt-32 text-white">
+        <div className="mx-auto max-w-7xl">
+          <p className="mb-4 font-bold uppercase tracking-widest text-yellow-400">
             Gallery
           </p>
 
-          <h1 className="text-5xl md:text-7xl font-bold mb-8 max-w-5xl leading-tight">
-            Capturing Community Moments
+          <h1 className="mb-6 text-4xl font-black md:text-6xl">
+            Community Gallery
           </h1>
 
-          <p className="text-xl text-gray-200 max-w-4xl">
-            Explore photos, memories, and highlights from USBC cultural events,
-            community gatherings, outreach programs, youth activities, and
-            celebrations across British Columbia.
+          <p className="max-w-3xl text-lg text-gray-300">
+            Explore USBC community memories, cultural events, celebrations, and
+            gatherings across British Columbia.
           </p>
         </div>
       </section>
 
-      <section className="px-6 py-24 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="max-w-3xl mb-12">
-            <p className="text-red-600 uppercase tracking-widest font-semibold mb-4">
-              Photo Albums
-            </p>
+      <section className="px-6 py-20">
+        <div className="mx-auto max-w-7xl">
+          {albums.length === 0 ? (
+            <div className="rounded-3xl bg-white p-10 text-center shadow-premium">
+              <h2 className="mb-3 text-3xl font-black text-gray-950">
+                No gallery albums yet
+              </h2>
 
-            <h2 className="text-4xl font-bold text-black mb-4">
-              Community Highlights
-            </h2>
+              <p className="text-gray-700">
+                Published community albums will appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {albums.map((album) => (
+                <Link
+                  key={album.id}
+                  href={`/gallery/${album.id}`}
+                  className="overflow-hidden rounded-3xl border bg-white shadow-premium transition hover:-translate-y-1 hover:shadow-xl"
+                >
+                  {album.cover_image ? (
+                    <img
+                      src={album.cover_image}
+                      alt={album.title}
+                      className="h-72 w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-72 items-center justify-center bg-gray-200 font-bold text-gray-500">
+                      No Cover Image
+                    </div>
+                  )}
 
-            <p className="text-lg text-gray-700">
-              This gallery will showcase approved photos and videos from USBC
-              events, programs, and community activities.
-            </p>
-          </div>
+                  <div className="p-6">
+                    <p className="mb-3 text-sm font-bold uppercase tracking-widest text-red-600">
+                      {album.event_date || "Community Album"}
+                    </p>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {galleryAlbums.map((album) => (
-              <div
-                key={album.title}
-                className="overflow-hidden rounded-3xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="h-56 bg-gradient-to-br from-gray-200 to-gray-100 flex items-center justify-center">
-                  <span className="text-gray-500">Photo Coming Soon</span>
-                </div>
+                    <h2 className="mb-3 text-3xl font-black text-gray-950">
+                      {album.title}
+                    </h2>
 
-                <div className="p-8">
-                  <p className="text-sm font-semibold uppercase tracking-widest text-red-600 mb-3">
-                    {album.category}
-                  </p>
-
-                  <h3 className="text-2xl font-bold text-black mb-4">
-                    {album.title}
-                  </h3>
-
-                  <p className="text-gray-700 mb-6">{album.description}</p>
-
-                  <button className="rounded-lg bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-gray-800">
-                    View Album
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="px-6 py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-8">
-          <div className="rounded-3xl border bg-white p-8 shadow-sm">
-            <p className="text-red-600 uppercase tracking-widest font-semibold mb-4">
-              Submit Photos
-            </p>
-
-            <h2 className="text-3xl font-bold text-black mb-6">
-              Share Your USBC Moments
-            </h2>
-
-            <p className="text-gray-700 mb-6">
-              Members and event organizers will be able to submit approved
-              photos and videos for inclusion in the gallery. All submissions
-              will be reviewed before publication.
-            </p>
-
-            <button className="rounded-lg bg-black px-6 py-3 font-semibold text-white hover:bg-gray-800">
-              Submit Photos
-            </button>
-          </div>
-
-          <div className="rounded-3xl border bg-black p-8 text-white shadow-sm">
-            <p className="text-yellow-400 uppercase tracking-widest font-semibold mb-4">
-              Privacy & Consent
-            </p>
-
-            <h2 className="text-3xl font-bold mb-6">
-              Respecting Member Privacy
-            </h2>
-
-            <p className="text-gray-300">
-              USBC will only publish approved photos and videos in accordance
-              with member consent, privacy expectations, and event participation
-              guidelines.
-            </p>
-          </div>
+                    <p className="text-gray-700">
+                      {album.description || "View photos from this USBC album."}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </main>

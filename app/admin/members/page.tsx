@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { sendApprovalEmail } from "@/lib/email";
-import AdminNav from "@/app/components/AdminNav";
 
 type Member = {
   id: number;

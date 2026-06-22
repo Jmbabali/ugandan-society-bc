@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import AdminNav from "@/app/components/AdminNav";
 
 type RenewalRequest = {
   id: number;
@@ -64,14 +63,16 @@ export default function AdminRenewalsPage() {
       })
       .eq("id", id);
 
-    if (!error) {
-      loadRenewals();
+    if (error) {
+      setMessage(error.message);
+      return;
     }
+
+    loadRenewals();
   }
 
   async function approveRenewal(request: RenewalRequest) {
     const currentExpiry = new Date(request.current_expiry_date);
-
     const newExpiry = new Date(currentExpiry);
     newExpiry.setFullYear(newExpiry.getFullYear() + 1);
 
@@ -112,24 +113,27 @@ export default function AdminRenewalsPage() {
       })
       .eq("id", id);
 
-    if (!error) {
-      loadRenewals();
+    if (error) {
+      setMessage(error.message);
+      return;
     }
+
+    loadRenewals();
   }
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p className="font-bold">Loading renewals...</p>
+      <main className="flex min-h-screen items-center justify-center bg-gray-100">
+        <p className="rounded-3xl bg-white p-8 font-bold shadow-xl">
+          Loading renewals...
+        </p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 px-6 py-20">
+    <main className="min-h-screen bg-gray-100 px-6 py-12">
       <div className="mx-auto max-w-7xl">
-        <AdminNav />
-
         <div className="mb-10">
           <p className="mb-4 font-bold uppercase tracking-widest text-red-600">
             USBC Admin
@@ -148,48 +152,24 @@ export default function AdminRenewalsPage() {
 
         <div className="grid gap-6">
           {renewals.map((renewal) => (
-            <div
-              key={renewal.id}
-              className="rounded-3xl bg-white p-8 shadow"
-            >
+            <div key={renewal.id} className="rounded-3xl bg-white p-8 shadow">
               <div className="grid gap-4 md:grid-cols-3">
                 <div>
-                  <p className="text-sm uppercase text-gray-500">
-                    Member
-                  </p>
-
-                  <p className="font-black">
-                    {renewal.member_name}
-                  </p>
-
+                  <p className="text-sm uppercase text-gray-500">Member</p>
+                  <p className="font-black">{renewal.member_name}</p>
                   <p>{renewal.member_email}</p>
                 </div>
 
                 <div>
-                  <p className="text-sm uppercase text-gray-500">
-                    Membership
-                  </p>
-
+                  <p className="text-sm uppercase text-gray-500">Membership</p>
                   <p>{renewal.membership_type}</p>
-
-                  <p>
-                    Current Expiry:{" "}
-                    {renewal.current_expiry_date}
-                  </p>
+                  <p>Current Expiry: {renewal.current_expiry_date}</p>
                 </div>
 
                 <div>
-                  <p className="text-sm uppercase text-gray-500">
-                    Status
-                  </p>
-
-                  <p>
-                    Renewal: {renewal.status}
-                  </p>
-
-                  <p>
-                    Payment: {renewal.payment_status}
-                  </p>
+                  <p className="text-sm uppercase text-gray-500">Status</p>
+                  <p>Renewal: {renewal.status}</p>
+                  <p>Payment: {renewal.payment_status}</p>
                 </div>
               </div>
 

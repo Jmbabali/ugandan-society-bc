@@ -40,6 +40,14 @@ export default function Navbar() {
               Resources
             </Link>
 
+            <Link href="/community-updates" className="font-medium text-white transition hover:text-yellow-400">
+              Community Updates
+            </Link>
+
+            <Link href="/business-hub" className="font-medium text-white transition hover:text-yellow-400">
+              Business Hub
+            </Link>
+
             <div className="relative group">
               <button className="py-8 font-medium text-white transition hover:text-yellow-400">
                 Member Area ▼
@@ -66,6 +74,13 @@ export default function Navbar() {
             className="hidden rounded-lg bg-yellow-400 px-5 py-3 font-bold text-black transition hover:bg-yellow-300 lg:block"
           >
             Join USBC
+          </Link>
+
+          <Link
+            href="/donations"
+            className="rounded-full bg-red-600 px-8 py-4 font-bold text-white transition hover:bg-red-700"
+          >
+            Donate
           </Link>
         </div>
       </div>

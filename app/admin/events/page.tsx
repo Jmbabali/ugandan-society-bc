@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import AdminNav from "@/app/components/AdminNav";
 
 type Event = {
   id: number;
@@ -14,6 +13,8 @@ type Event = {
   event_time: string;
   registration_deadline: string;
   status: string;
+  poster_url: string | null;
+  created_at?: string;
 };
 
 type EventRegistration = {
@@ -33,6 +34,7 @@ export default function AdminEventsPage() {
   const [registrations, setRegistrations] = useState<EventRegistration[]>([]);
   const [message, setMessage] = useState("");
   const [checkingLogin, setCheckingLogin] = useState(true);
+  const [posterFile, setPosterFile] = useState<File | null>(null);
 
   const [form, setForm] = useState({
     title: "",
@@ -85,8 +87,15 @@ export default function AdminEventsPage() {
     setRegistrations(data || []);
   }
 
+  async function refreshAll() {
+    await loadEvents();
+    await loadRegistrations();
+  }
+
   function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) {
     setForm({
       ...form,
@@ -96,8 +105,32 @@ export default function AdminEventsPage() {
 
   async function createEvent(e: React.FormEvent) {
     e.preventDefault();
-
     setMessage("Creating event...");
+
+    let posterUrl = "";
+
+    if (posterFile) {
+      const fileExt = posterFile.name.split(".").pop() || "jpg";
+      const safeFileName = `event-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("event-posters")
+        .upload(safeFileName, posterFile, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        setMessage(uploadError.message);
+        return;
+      }
+
+      const { data } = supabase.storage
+        .from("event-posters")
+        .getPublicUrl(safeFileName);
+
+      posterUrl = data.publicUrl;
+    }
 
     const { error } = await supabase.from("Events").insert({
       title: form.title,
@@ -107,6 +140,7 @@ export default function AdminEventsPage() {
       event_time: form.event_time,
       registration_deadline: form.registration_deadline,
       status: form.status,
+      poster_url: posterUrl,
       created_at: new Date().toISOString(),
     });
 
@@ -127,7 +161,8 @@ export default function AdminEventsPage() {
       status: "Open",
     });
 
-    await loadEvents();
+    setPosterFile(null);
+    await refreshAll();
   }
 
   async function deleteEvent(event: Event) {
@@ -139,10 +174,7 @@ export default function AdminEventsPage() {
 
     setMessage("Deleting event...");
 
-    const { error } = await supabase
-      .from("Events")
-      .delete()
-      .eq("id", event.id);
+    const { error } = await supabase.from("Events").delete().eq("id", event.id);
 
     if (error) {
       setMessage(error.message);
@@ -150,7 +182,7 @@ export default function AdminEventsPage() {
     }
 
     setMessage("Event deleted successfully.");
-    await loadEvents();
+    await refreshAll();
   }
 
   async function updateEventStatus(event: Event, status: string) {
@@ -167,7 +199,12 @@ export default function AdminEventsPage() {
     }
 
     setMessage("Event status updated.");
-    await loadEvents();
+    await refreshAll();
+  }
+
+  function getRegistrationCount(eventId: number) {
+    return registrations.filter((registration) => registration.event_id === eventId)
+      .length;
   }
 
   function exportRegistrationsCSV() {
@@ -209,6 +246,10 @@ export default function AdminEventsPage() {
     URL.revokeObjectURL(url);
   }
 
+  const openEvents = events.filter((event) => event.status === "Open").length;
+  const closedEvents = events.filter((event) => event.status === "Closed").length;
+  const hiddenEvents = events.filter((event) => event.status === "Hidden").length;
+
   if (checkingLogin) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-gray-100 px-6">
@@ -220,7 +261,7 @@ export default function AdminEventsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 px-6 py-20">
+    <main className="min-h-screen bg-gray-100 px-6 py-12">
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
@@ -233,17 +274,26 @@ export default function AdminEventsPage() {
             </h1>
 
             <p className="mt-4 max-w-3xl text-lg text-gray-700">
-              Create events, manage registrations, open or close registration,
-              and export event attendee lists.
+              Create events, upload posters, manage visibility, track
+              registrations, and export attendee lists.
             </p>
           </div>
 
-          <button
-            onClick={exportRegistrationsCSV}
-            className="rounded-xl bg-gray-950 px-6 py-4 font-bold text-white hover:bg-gray-800"
-          >
-            Export Registrations CSV
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={refreshAll}
+              className="rounded-xl bg-white px-6 py-4 font-bold text-gray-950 shadow hover:bg-gray-50"
+            >
+              Refresh
+            </button>
+
+            <button
+              onClick={exportRegistrationsCSV}
+              className="rounded-xl bg-gray-950 px-6 py-4 font-bold text-white hover:bg-gray-800"
+            >
+              Export CSV
+            </button>
+          </div>
         </div>
 
         {message && (
@@ -251,6 +301,45 @@ export default function AdminEventsPage() {
             {message}
           </p>
         )}
+
+        <div className="mb-10 grid gap-4 md:grid-cols-5">
+          <div className="rounded-3xl bg-gray-950 p-6 text-white shadow">
+            <p className="text-sm font-bold uppercase text-gray-300">
+              Total Events
+            </p>
+            <p className="mt-2 text-4xl font-black">{events.length}</p>
+          </div>
+
+          <div className="rounded-3xl bg-green-50 p-6 shadow">
+            <p className="text-sm font-bold uppercase text-gray-500">Open</p>
+            <p className="mt-2 text-4xl font-black text-green-700">
+              {openEvents}
+            </p>
+          </div>
+
+          <div className="rounded-3xl bg-yellow-50 p-6 shadow">
+            <p className="text-sm font-bold uppercase text-gray-500">Closed</p>
+            <p className="mt-2 text-4xl font-black text-yellow-700">
+              {closedEvents}
+            </p>
+          </div>
+
+          <div className="rounded-3xl bg-gray-200 p-6 shadow">
+            <p className="text-sm font-bold uppercase text-gray-500">Hidden</p>
+            <p className="mt-2 text-4xl font-black text-gray-950">
+              {hiddenEvents}
+            </p>
+          </div>
+
+          <div className="rounded-3xl bg-white p-6 shadow">
+            <p className="text-sm font-bold uppercase text-gray-500">
+              Registrations
+            </p>
+            <p className="mt-2 text-4xl font-black">
+              {registrations.length}
+            </p>
+          </div>
+        </div>
 
         <form
           onSubmit={createEvent}
@@ -327,6 +416,23 @@ export default function AdminEventsPage() {
             className="mt-4 h-36 w-full rounded-xl border px-4 py-4 text-gray-950"
           />
 
+          <div className="mt-4">
+            <label className="mb-2 block text-sm font-bold uppercase text-gray-500">
+              Event Poster / Flyer
+            </label>
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setPosterFile(e.target.files?.[0] || null)}
+              className="w-full rounded-xl border bg-white px-4 py-4 text-gray-950"
+            />
+
+            <p className="mt-2 text-sm text-gray-600">
+              Optional. Upload a poster or flyer image for this event.
+            </p>
+          </div>
+
           <button
             type="submit"
             className="mt-6 rounded-xl bg-gray-950 px-8 py-4 font-bold text-white hover:bg-gray-800"
@@ -346,8 +452,22 @@ export default function AdminEventsPage() {
                 key={event.id}
                 className="rounded-3xl border bg-white p-6 shadow-premium"
               >
-                <div className="grid gap-6 lg:grid-cols-4">
+                <div className="grid gap-6 lg:grid-cols-5">
                   <div>
+                    {event.poster_url ? (
+                      <img
+                        src={event.poster_url}
+                        alt={event.title}
+                        className="h-44 w-full rounded-2xl object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-44 w-full items-center justify-center rounded-2xl bg-gray-100 font-bold text-gray-500">
+                        No Poster
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="lg:col-span-2">
                     <p className="text-sm font-bold uppercase text-gray-500">
                       Event
                     </p>
@@ -356,9 +476,7 @@ export default function AdminEventsPage() {
                       {event.title}
                     </h3>
 
-                    <p className="mt-2 text-gray-700">
-                      {event.description}
-                    </p>
+                    <p className="mt-2 text-gray-700">{event.description}</p>
                   </div>
 
                   <div>
@@ -376,24 +494,13 @@ export default function AdminEventsPage() {
                     <p className="mt-2 text-sm text-gray-600">
                       Deadline: {event.registration_deadline}
                     </p>
-                  </div>
 
-                  <div>
-                    <p className="text-sm font-bold uppercase text-gray-500">
-                      Status
-                    </p>
-
-                    <p className="font-black text-gray-950">
-                      {event.status}
+                    <p className="mt-3 text-sm font-bold text-gray-950">
+                      Status: {event.status}
                     </p>
 
                     <p className="mt-2 text-sm text-gray-600">
-                      Registrations:{" "}
-                      {
-                        registrations.filter(
-                          (registration) => registration.event_id === event.id
-                        ).length
-                      }
+                      Registrations: {getRegistrationCount(event.id)}
                     </p>
                   </div>
 
@@ -433,74 +540,6 @@ export default function AdminEventsPage() {
             {events.length === 0 && (
               <p className="rounded-3xl bg-white p-8 text-center font-bold text-gray-700">
                 No events created yet.
-              </p>
-            )}
-          </div>
-        </section>
-
-        <section>
-          <h2 className="mb-6 text-3xl font-black text-gray-950">
-            Event Registrations
-          </h2>
-
-          <div className="grid gap-4">
-            {registrations.map((registration) => (
-              <div
-                key={registration.id}
-                className="rounded-2xl border bg-white p-5 shadow"
-              >
-                <div className="grid gap-4 md:grid-cols-5">
-                  <div>
-                    <p className="text-xs font-bold uppercase text-gray-500">
-                      Event ID
-                    </p>
-                    <p className="font-bold text-gray-950">
-                      {registration.event_id}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-bold uppercase text-gray-500">
-                      Member
-                    </p>
-                    <p className="font-bold text-gray-950">
-                      {registration.member_name}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-bold uppercase text-gray-500">
-                      Member ID
-                    </p>
-                    <p className="font-bold text-gray-950">
-                      {registration.member_id}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-bold uppercase text-gray-500">
-                      Email
-                    </p>
-                    <p className="font-bold text-gray-950">
-                      {registration.member_email}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-bold uppercase text-gray-500">
-                      Status
-                    </p>
-                    <p className="font-bold text-green-700">
-                      {registration.status}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {registrations.length === 0 && (
-              <p className="rounded-3xl bg-white p-8 text-center font-bold text-gray-700">
-                No event registrations yet.
               </p>
             )}
           </div>
