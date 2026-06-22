@@ -37,6 +37,10 @@ export default function AdminNav() {
             Updates
           </Link>
 
+          <Link href="/admin/donations" className="rounded-xl bg-yellow-400 px-6 py-4 font-bold text-black hover:bg-yellow-300">
+            Donations
+          </Link>
+
         </div>
       </div>
     </div>
