@@ -1,10 +1,82 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Users, Drum, HeartHandshake, TrendingUp } from "lucide-react";
+
+const heroSlides = [
+  {
+    image: "/home/community-1.jpg",
+    label: "Ugandan Society in BC",
+    title: "A Stronger Ugandan Community in British Columbia",
+    text: "Connecting families, professionals, students, entrepreneurs, newcomers, and friends of Uganda through culture, service, business, and community support.",
+  },
+  {
+    image: "/home/community-2.jpg",
+    label: "Community Connection",
+    title: "Building Connections Across British Columbia",
+    text: "USBC brings people together through events, networking, outreach, family support, and shared community participation.",
+  },
+  {
+    image: "/home/community-3.jpg",
+    label: "Culture & Heritage",
+    title: "Preserving Ugandan Heritage",
+    text: "We celebrate Ugandan identity through culture, traditions, food, music, language, community gatherings, and shared values.",
+  },
+  {
+    image: "/home/community-4.jpg",
+    label: "Community Growth",
+    title: "Empowering Members and Families",
+    text: "USBC supports newcomers, youth, families, professionals, entrepreneurs, and community partnerships across British Columbia.",
+  },
+];
+
+const actionSlides = [
+  {
+    main: "/home/community-2.jpg",
+    sideTop: "/home/community-3.jpg",
+    sideBottom: "/home/community-4.jpg",
+  },
+  {
+    main: "/home/community-3.jpg",
+    sideTop: "/home/community-4.jpg",
+    sideBottom: "/home/community-1.jpg",
+  },
+  {
+    main: "/home/community-4.jpg",
+    sideTop: "/home/community-1.jpg",
+    sideBottom: "/home/community-2.jpg",
+  },
+];
+
+const highlights = [
+  {
+    title: "Unity",
+    text: "Bringing people together across generations.",
+    icon: Users,
+  },
+  {
+    title: "Culture",
+    text: "Preserving Ugandan heritage and traditions.",
+    icon: Drum,
+  },
+  {
+    title: "Support",
+    text: "Helping members and newcomers thrive.",
+    icon: HeartHandshake,
+  },
+  {
+    title: "Growth",
+    text: "Empowering families and businesses.",
+    icon: TrendingUp,
+  },
+];
 
 const partners = [
   {
     name: "Tamutamu",
-    logo: "/partners/",
+    logo: "/partners/tamutamu.png",
     website: "https://www.tamutamu.co",
   },
   {
@@ -14,251 +86,269 @@ const partners = [
   },
 ];
 
-const highlights = [
-  {
-    title: "Unity",
-    text: "Bringing people together",
-    icon: "🤝",
-  },
-  {
-    title: "Culture",
-    text: "Preserving Ugandan heritage",
-    icon: "🥁",
-  },
-  {
-    title: "Support",
-    text: "Helping members and newcomers",
-    icon: "❤️",
-  },
-  {
-    title: "Growth",
-    text: "Empowering families and businesses",
-    icon: "🌱",
-  },
-];
-
-const platformCards = [
+const connectCards = [
   {
     title: "Become a Member",
-    text: "Join USBC, access member benefits, events, updates, and future digital membership services.",
+    text: "Access member benefits, updates, events, and digital services.",
     link: "/membership",
+    image: "/home/community-1.jpg",
   },
   {
     title: "Attend Events",
-    text: "Participate in cultural celebrations, networking sessions, workshops, sports, and community gatherings.",
+    text: "Join cultural events, workshops, sports, and gatherings.",
     link: "/events",
+    image: "/home/community-2.jpg",
   },
   {
     title: "Business Hub",
-    text: "Discover and promote Ugandan-owned businesses, professionals, entrepreneurs, and partners in BC.",
+    text: "Promote Ugandan businesses and professional services in BC.",
     link: "/business-hub",
+    image: "/home/community-3.jpg",
   },
   {
     title: "Gallery",
-    text: "Explore approved photos and memories from USBC activities, gatherings, and cultural events.",
+    text: "Explore photos and memories from our events and activities.",
     link: "/gallery",
+    image: "/home/community-4.jpg",
   },
   {
     title: "Resources",
-    text: "Access newcomer support, employment guidance, youth resources, and community referrals.",
+    text: "Find newcomer support, jobs, youth resources, and referrals.",
     link: "/resources",
+    image: "/home/community-2.jpg",
   },
   {
     title: "Support USBC",
-    text: "Donate, sponsor programs, support events, or partner with USBC to strengthen community impact.",
+    text: "Donate, sponsor programs, or partner with us.",
     link: "/donations",
+    image: "/home/community-3.jpg",
   },
 ];
 
 export default function HomePage() {
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [activeAction, setActiveAction] = useState(0);
+ 
+  const slide = heroSlides[activeSlide];
+  const action = actionSlides[activeAction];
+
   return (
-    <main className="min-h-screen bg-gray-950">
-      <section className="relative overflow-hidden bg-gray-950 text-white">
-        <div className="absolute inset-0">
+    <main className="min-h-screen bg-white">
+      <section className="relative min-h-[700px] overflow-hidden bg-gray-950 text-white">
+        {heroSlides.map((item, index) => (
           <Image
-            src="/home/community-1.png"
-            alt="Ugandan community in British Columbia"
+            key={item.image}
+            src={item.image}
+            alt={item.title}
             fill
-            priority
-            className="object-cover opacity-35"
+            priority={index === 0}
+            sizes="100vw"
+            className={`object-cover transition-opacity duration-1000 ${
+              activeSlide === index ? "opacity-100" : "opacity-0"
+            }`}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/85 to-gray-950/40" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(250,204,21,0.30),transparent_28%),radial-gradient(circle_at_80%_30%,rgba(220,38,38,0.25),transparent_25%)]" />
+        ))}
+
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+
+        <div className="relative mx-auto flex min-h-[700px] max-w-7xl items-center px-6">
+          <div className="max-w-3xl">
+            <p className="mb-5 font-black uppercase tracking-widest text-yellow-400">
+              {slide.label}
+            </p>
+
+            <h1 className="mb-8 text-5xl font-black leading-tight md:text-7xl">
+              {slide.title}
+            </h1>
+
+            <p className="mb-10 max-w-2xl text-lg leading-8 text-gray-100 md:text-xl">
+              {slide.text}
+            </p>
+
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/membership"
+                className="rounded-xl bg-yellow-400 px-8 py-4 font-black text-black shadow-xl transition hover:bg-yellow-300"
+              >
+                Join the Community
+              </Link>
+
+              <Link
+                href="/donations"
+                className="rounded-xl bg-red-600 px-8 py-4 font-black text-white shadow-xl transition hover:bg-red-700"
+              >
+                Donate
+              </Link>
+
+              <Link
+                href="/events"
+                className="rounded-xl border border-white/40 bg-white/10 px-8 py-4 font-black text-white backdrop-blur transition hover:bg-white hover:text-black"
+              >
+                View Events
+              </Link>
+            </div>
+          </div>
         </div>
 
-        <div className="relative mx-auto max-w-7xl px-6 py-24 md:py-32">
-          <div className="grid items-center gap-14 lg:grid-cols-2">
-            <div>
-              <p className="mb-5 font-bold uppercase tracking-widest text-yellow-400">
-                Ugandan Society in BC
-              </p>
+        <div className="absolute bottom-24 right-10 hidden items-center gap-4 md:flex">
+          <button
+            onClick={() =>
+              setActiveSlide(
+                activeSlide === 0 ? heroSlides.length - 1 : activeSlide - 1
+              )
+            }
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-white/40 bg-black/30 text-xl font-black text-white backdrop-blur hover:bg-white hover:text-black"
+          >
+            ‹
+          </button>
 
-              <h1 className="mb-8 text-5xl font-black leading-tight md:text-7xl">
-                A Stronger Ugandan Community in British Columbia
-              </h1>
+          <button
+            onClick={() =>
+              setActiveSlide((activeSlide + 1) % heroSlides.length)
+            }
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-white/40 bg-black/30 text-xl font-black text-white backdrop-blur hover:bg-white hover:text-black"
+          >
+            ›
+          </button>
 
-              <p className="mb-10 max-w-2xl text-xl text-gray-200">
-                Connecting families, professionals, students, entrepreneurs,
-                newcomers, and friends of Uganda through culture, service,
-                business, and community support.
-              </p>
-
-              <div className="flex flex-wrap gap-4">
-                <Link
-                  href="/membership"
-                  className="rounded-full bg-yellow-400 px-8 py-4 font-black text-black shadow-xl transition hover:-translate-y-1 hover:bg-yellow-300"
-                >
-                  Join the Community
-                </Link>
-
-                <Link
-                  href="/donations"
-                  className="rounded-full bg-red-600 px-8 py-4 font-black text-white shadow-xl transition hover:-translate-y-1 hover:bg-red-700"
-                >
-                  Donate
-                </Link>
-
-                <Link
-                  href="/events"
-                  className="rounded-full border border-white/30 bg-white/10 px-8 py-4 font-bold backdrop-blur transition hover:bg-white hover:text-black"
-                >
-                  View Events
-                </Link>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="absolute -inset-6 rounded-[3rem] bg-yellow-400/20 blur-3xl" />
-
-              <div className="relative grid gap-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="relative h-64 overflow-hidden rounded-[2rem] shadow-2xl">
-                    <Image
-                      src="/home/community-2.png"
-                      alt="USBC community gathering"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-
-                  <div className="relative h-64 overflow-hidden rounded-[2rem] shadow-2xl">
-                    <Image
-                      src="/home/community-3.png"
-                      alt="Ugandan cultural celebration"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                </div>
-
-                <div className="relative h-56 overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
-                  <Image
-                    src="/home/community-4.png"
-                    alt="Community support and connection"
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-950/70 to-transparent" />
-                  <div className="absolute bottom-6 left-6">
-                    <Image
-                      src="/logo.png"
-                      alt="USBC Logo"
-                      width={70}
-                      height={70}
-                      className="mb-3 rounded-full bg-white p-2"
-                    />
-                    <p className="text-2xl font-black">
-                      Building Connections.
-                    </p>
-                    <p className="text-yellow-400 font-bold">
-                      Preserving Heritage.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative mt-16 grid gap-4 rounded-[2rem] border border-white/10 bg-white/10 p-5 backdrop-blur md:grid-cols-4">
-            {highlights.map((item) => (
-              <div
-                key={item.title}
-                className="rounded-2xl border border-white/10 bg-black/20 p-6"
-              >
-                <div className="mb-3 text-3xl">{item.icon}</div>
-                <h3 className="mb-2 text-xl font-black text-yellow-400">
-                  {item.title}
-                </h3>
-                <p className="text-sm text-gray-300">{item.text}</p>
-              </div>
-            ))}
-          </div>
+          <p className="font-black text-white">
+            {activeSlide + 1} / {heroSlides.length}
+          </p>
         </div>
       </section>
 
-      <section className="bg-white px-6 py-24">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2">
+      <section className="relative z-10 -mt-4 px-6">
+  <div className="mx-auto grid max-w-6xl overflow-hidden rounded-3xl bg-white shadow-2xl md:grid-cols-4">
+    {highlights.map((item) => {
+      const Icon = item.icon;
+
+      return (
+        <div
+          key={item.title}
+          className="border-b border-gray-200 p-8 text-center md:border-b-0 md:border-r last:border-r-0"
+        >
+          <Icon className="mx-auto mb-4 h-14 w-14 text-red-600" />
+
+          <h3 className="mb-3 text-2xl font-black text-gray-950">
+            {item.title}
+          </h3>
+
+          <p className="text-gray-700">{item.text}</p>
+        </div>
+      );
+    })}
+  </div>
+</section>
+
+      <section className="bg-slate-100 px-6 py-18">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-3">
           <div>
-            <p className="mb-4 font-bold uppercase tracking-widest text-red-600">
-              Who We Are
+            <p className="mb-4 font-black uppercase tracking-widest text-red-600">
+              Community in Action
             </p>
 
             <h2 className="mb-6 text-4xl font-black text-gray-950 md:text-5xl">
-              Building Connections. Preserving Heritage. Empowering Community.
+              Our Community, Our Strength
             </h2>
 
             <p className="mb-8 text-lg leading-8 text-gray-700">
-              USBC is a community platform for Ugandans and friends of Uganda in
-              British Columbia. We promote unity, culture, service, networking,
-              business support, and meaningful community participation.
+              From cultural celebrations to community outreach, sports,
+              networking, and family events, USBC is built on connection,
+              participation, and shared purpose.
             </p>
 
             <Link
-              href="/about"
-              className="inline-block rounded-full bg-gray-950 px-8 py-4 font-bold text-white transition hover:bg-gray-800"
+              href="/events"
+              className="inline-block rounded-xl bg-red-600 px-8 py-4 font-black text-white transition hover:bg-red-700"
             >
-              Learn About USBC
+              Explore Our Events
             </Link>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2">
-            <div className="relative h-72 overflow-hidden rounded-[2rem] shadow-xl md:mt-12">
-              <Image
-                src="/home/community-2.png"
-                alt="Community event"
-                fill
-                className="object-cover"
-              />
+          <div className="relative lg:col-span-2">
+            <div className="grid gap-5 md:grid-cols-3">
+              <div className="relative h-80 overflow-hidden rounded-3xl shadow-xl md:col-span-2">
+                <Image
+                  src={action.main}
+                  alt="USBC community slideshow"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover"
+                />
+              </div>
+
+              <div className="grid gap-5">
+                <div className="relative h-[150px] overflow-hidden rounded-3xl shadow-xl">
+                  <Image
+                    src={action.sideTop}
+                    alt="USBC event photo"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 25vw"
+                    className="object-cover"
+                  />
+                </div>
+
+                <div className="relative h-[150px] overflow-hidden rounded-3xl shadow-xl">
+                  <Image
+                    src={action.sideBottom}
+                    alt="USBC community photo"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 25vw"
+                    className="object-cover"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="relative h-72 overflow-hidden rounded-[2rem] shadow-xl">
-              <Image
-                src="/home/community-3.png"
-                alt="Cultural event"
-                fill
-                className="object-cover"
-              />
+            <button
+              onClick={() =>
+                setActiveAction(
+                  activeAction === 0
+                    ? actionSlides.length - 1
+                    : activeAction - 1
+                )
+              }
+              className="absolute left-4 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white font-black text-gray-950 shadow-xl hover:bg-yellow-400"
+            >
+              ‹
+            </button>
+
+            <button
+              onClick={() =>
+                setActiveAction((activeAction + 1) % actionSlides.length)
+              }
+              className="absolute right-4 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white font-black text-gray-950 shadow-xl hover:bg-yellow-400"
+            >
+              ›
+            </button>
+
+            <div className="mt-6 flex justify-center gap-2">
+              {actionSlides.map((item, index) => (
+                <button
+                  key={item.main}
+                  onClick={() => setActiveAction(index)}
+                  className={`h-3 rounded-full transition-all ${
+                    activeAction === index
+                      ? "w-8 bg-red-600"
+                      : "w-3 bg-gray-300"
+                  }`}
+                />
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-gray-100 px-6 py-24">
-        <div className="mx-auto max-w-7xl">
-          <div className="mx-auto mb-14 max-w-3xl text-center">
-            <div className="mb-6 flex items-center justify-center gap-4">
-              <div className="h-px w-20 bg-gray-300" />
-              <p className="font-serif text-2xl uppercase tracking-widest text-gray-900">
-                Our Valued Sponsors & Partners
-              </p>
-              <div className="h-px w-20 bg-gray-300" />
-            </div>
+      <section className="bg-slate-100 px-6 pb-18">
+        <div className="mx-auto max-w-5xl text-center">
+          <p className="mb-4 font-black uppercase tracking-widest text-red-600">
+            Our Partners
+          </p>
 
-            <p className="text-gray-600">
-              USBC recognizes the organizations, businesses, and community
-              partners that support our programs, events, and community growth.
-            </p>
-          </div>
+          <h2 className="mb-10 text-4xl font-black text-gray-950">
+            Sponsors & Partners
+          </h2>
 
           <div className="mx-auto grid max-w-5xl grid-cols-2 gap-10 md:grid-cols-4">
             {partners.map((partner) => (
@@ -267,7 +357,7 @@ export default function HomePage() {
                 href={partner.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-32 items-center justify-center rounded-2xl bg-white p-6 shadow-sm transition hover:scale-105 hover:shadow-lg"
+                className="flex h-40 items-center justify-center rounded-3xl border bg-white p-8 shadow-lg transition hover:-translate-y-1 hover:shadow-xl"
               >
                 <img
                   src={partner.logo}
@@ -277,154 +367,115 @@ export default function HomePage() {
               </a>
             ))}
           </div>
+
+          <Link
+            href="/partners"
+            className="mt-8 inline-block font-black text-red-600 hover:text-red-700"
+          >
+            View All Partners →
+          </Link>
         </div>
       </section>
 
-      <section className="bg-white px-6 py-28">
+      <section className="bg-gray-100 px-6 py-18">
         <div className="mx-auto max-w-7xl">
-          <div className="mx-auto mb-16 max-w-3xl text-center">
-            <p className="mb-4 font-bold uppercase tracking-widest text-red-600">
-              Community Platform
+          <div className="mx-auto mb-14 max-w-3xl text-center">
+            <p className="mb-4 font-black uppercase tracking-widest text-red-600">
+              Get Involved
             </p>
 
-            <h2 className="mb-6 text-4xl font-black text-gray-950 md:text-5xl">
-              Get Involved Your Way
+            <h2 className="text-4xl font-black text-gray-950 md:text-5xl">
+              Ways to Connect with USBC
             </h2>
-
-            <p className="text-lg text-gray-600">
-              Choose how you want to connect with USBC.
-            </p>
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {platformCards.map((item) => (
+            {connectCards.map((item) => (
               <Link
                 key={item.title}
                 href={item.link}
-                className="group rounded-[2rem] border bg-gray-50 p-8 shadow-premium transition hover:-translate-y-1 hover:bg-gray-950"
+                className="group overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
               >
-                <h3 className="mb-4 text-2xl font-bold text-gray-950 group-hover:text-yellow-400">
-                  {item.title}
-                </h3>
+                <div className="relative h-44">
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover transition duration-500 group-hover:scale-105"
+                  />
+                </div>
 
-                <p className="mb-6 text-gray-600 group-hover:text-gray-300">
-                  {item.text}
-                </p>
+                <div className="p-6">
+                  <h3 className="mb-3 text-xl font-black text-gray-950">
+                    {item.title}
+                  </h3>
 
-                <span className="font-bold text-red-600 group-hover:text-yellow-400">
-                  Explore →
-                </span>
+                  <p className="mb-5 text-gray-700">{item.text}</p>
+
+                  <span className="font-black text-red-600">
+                    Learn More →
+                  </span>
+                </div>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-gray-950 px-6 py-28 text-white">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2">
-          <div>
-            <p className="mb-4 font-bold uppercase tracking-widest text-yellow-400">
-              Business & Partnerships
-            </p>
+      <section className="bg-slate-100 px-6 py-18">
+  <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl bg-gray-950 px-10 py-24 text-white shadow-2xl md:px-14">
+    <Image
+      src="/home/vancouver-banner.jpg"
+      alt="British Columbia skyline"
+      fill
+      sizes="100vw"
+      className="object-cover"
+    />
 
-            <h2 className="mb-6 text-4xl font-black md:text-5xl">
-              Supporting Ugandan businesses and community partnerships.
-            </h2>
+    <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-black/50" />
 
-            <p className="mb-8 text-lg leading-8 text-gray-300">
-              The Business Hub and Partners section help connect members with
-              businesses, sponsors, professionals, community organizations, and
-              opportunities across British Columbia.
-            </p>
+    <div className="relative grid items-center gap-10 md:grid-cols-2">
+      <div>
+        <p className="mb-4 font-black uppercase tracking-widest text-yellow-400">
+          Join USBC Today
+        </p>
 
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/business-hub"
-                className="rounded-full bg-yellow-400 px-8 py-4 font-bold text-black transition hover:bg-yellow-300"
-              >
-                Business Hub
-              </Link>
+        <h2 className="mb-5 text-5xl font-black leading-tight md:text-5xl">
+          Be part of something bigger.
+        </h2>
 
-              <Link
-                href="/contact"
-                className="rounded-full border border-white/30 px-8 py-4 font-bold transition hover:bg-white hover:text-black"
-              >
-                Become a Sponsor
-              </Link>
-            </div>
-          </div>
+        <p className="max-w-xl text-lg leading-8 text-gray-200">
+          Join a growing community dedicated to unity, culture, service,
+          business support, and meaningful connection.
+        </p>
+      </div>
 
-          <div className="grid gap-5">
-            <div className="rounded-3xl border border-white/10 bg-white/10 p-8">
-              <h3 className="mb-3 text-2xl font-bold text-yellow-400">
-                Business Directory
-              </h3>
-              <p className="text-gray-300">
-                Promote Ugandan-owned businesses and professional services.
-              </p>
-            </div>
+      <div className="flex flex-row items-center justify-end gap-4 md:whitespace-nowrap">
+        <Link
+          href="/membership"
+          className="rounded-xl bg-yellow-400 px-6 py-4 font-black text-black transition hover:bg-yellow-300"
+        >
+          Become a Member
+        </Link>
 
-            <div className="rounded-3xl border border-white/10 bg-white/10 p-8">
-              <h3 className="mb-3 text-2xl font-bold text-yellow-400">
-                Sponsors & Partners
-              </h3>
-              <p className="text-gray-300">
-                Build relationships with businesses, sponsors, and supporters.
-              </p>
-            </div>
+        <Link
+          href="/donations"
+          className="rounded-xl bg-red-600 px-8 py-4 font-black text-white transition hover:bg-red-700"
+        >
+          Donate
+        </Link>
 
-            <div className="rounded-3xl border border-white/10 bg-white/10 p-8">
-              <h3 className="mb-3 text-2xl font-bold text-yellow-400">
-                Community Growth
-              </h3>
-              <p className="text-gray-300">
-                Support initiatives that strengthen families, youth, and
-                newcomers.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-gray-100 px-6 py-28">
-        <div className="mx-auto max-w-6xl rounded-[2.5rem] bg-white p-12 text-center shadow-2xl">
-          <p className="mb-4 font-bold uppercase tracking-widest text-red-600">
-            Join USBC
-          </p>
-
-          <h2 className="mb-6 text-4xl font-black text-gray-950 md:text-6xl">
-            Be part of something bigger.
-          </h2>
-
-          <p className="mx-auto mb-10 max-w-3xl text-xl text-gray-600">
-            Join a growing community dedicated to unity, culture, service,
-            business support, and meaningful connection.
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/membership"
-              className="rounded-full bg-gray-950 px-8 py-4 font-bold text-white transition hover:bg-gray-800"
-            >
-              Become a Member
-            </Link>
-
-            <Link
-              href="/donations"
-              className="rounded-full bg-red-600 px-8 py-4 font-bold text-white transition hover:bg-red-700"
-            >
-              Donate
-            </Link>
-
-            <Link
-              href="/contact"
-              className="rounded-full bg-yellow-400 px-8 py-4 font-bold text-black transition hover:bg-yellow-300"
-            >
-              Contact USBC
-            </Link>
-          </div>
-        </div>
-      </section>
+        <Link
+          href="/contact"
+          className="rounded-xl border border-white/50 px-8 py-4 font-black text-white transition hover:bg-white hover:text-black"
+        >
+          Contact USBC
+        </Link>
+      </div>
+    </div>
+  </div>
+</section>
     </main>
   );
 }
