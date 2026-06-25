@@ -1,3 +1,6 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import AdminNav from "@/app/components/AdminNav";
 
 export default function AdminLayout({
@@ -5,9 +8,12 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isLoginPage = pathname === "/admin/login";
+
   return (
     <>
-      <AdminNav />
+      {!isLoginPage && <AdminNav />}
       {children}
     </>
   );

@@ -76,3 +76,32 @@ a {
   color: #facc15;
   background: rgba(255, 255, 255, 0.08);
 }
+
+/* Homepage Hero Animations */
+@keyframes heroZoom {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.08);
+  }
+}
+
+.hero-zoom {
+  animation: heroZoom 8s ease-in-out forwards;
+}
+
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-up {
+  animation: fadeUp 0.8s ease-out both;
+}

@@ -16,6 +16,7 @@
     "next": "16.2.9",
     "qrcode.react": "^4.2.0",
     "react": "19.2.4",
+    "react-countup": "^6.5.3",
     "react-dom": "19.2.4",
     "stripe": "^22.2.2"
   },

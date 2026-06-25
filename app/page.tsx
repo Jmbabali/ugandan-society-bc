@@ -2,12 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Users, Drum, HeartHandshake, TrendingUp } from "lucide-react";
+import { useState } from "react";
+import { Users, Music, HeartHandshake, TrendingUp } from "lucide-react";
+import Stats from "./components/Stats";
+import WhyJoin from "./components/WhyJoin";
+import LatestUpdates from "./components/LatestUpdates";
 
 const heroSlides = [
   {
-    image: "/home/community-1.jpg",
+    image: "/home/community-3.jpg",
     label: "Ugandan Society in BC",
     title: "A Stronger Ugandan Community in British Columbia",
     text: "Connecting families, professionals, students, entrepreneurs, newcomers, and friends of Uganda through culture, service, business, and community support.",
@@ -19,7 +22,7 @@ const heroSlides = [
     text: "USBC brings people together through events, networking, outreach, family support, and shared community participation.",
   },
   {
-    image: "/home/community-3.jpg",
+    image: "/home/community-1.jpg",
     label: "Culture & Heritage",
     title: "Preserving Ugandan Heritage",
     text: "We celebrate Ugandan identity through culture, traditions, food, music, language, community gatherings, and shared values.",
@@ -59,7 +62,7 @@ const highlights = [
   {
     title: "Culture",
     text: "Preserving Ugandan heritage and traditions.",
-    icon: Drum,
+    icon: Music,
   },
   {
     title: "Support",
@@ -91,44 +94,44 @@ const connectCards = [
     title: "Become a Member",
     text: "Access member benefits, updates, events, and digital services.",
     link: "/membership",
-    image: "/home/community-1.jpg",
+    image: "/home/become-member.jpg",
   },
   {
     title: "Attend Events",
     text: "Join cultural events, workshops, sports, and gatherings.",
     link: "/events",
-    image: "/home/community-2.jpg",
+    image: "/home/events.jpg",
   },
   {
     title: "Business Hub",
     text: "Promote Ugandan businesses and professional services in BC.",
     link: "/business-hub",
-    image: "/home/community-3.jpg",
+    image: "/home/business-hub.jpg",
   },
   {
     title: "Gallery",
     text: "Explore photos and memories from our events and activities.",
     link: "/gallery",
-    image: "/home/community-4.jpg",
+    image: "/home/gallery.jpg",
   },
   {
     title: "Resources",
     text: "Find newcomer support, jobs, youth resources, and referrals.",
     link: "/resources",
-    image: "/home/community-2.jpg",
+    image: "/home/resources.jpg",
   },
   {
     title: "Support USBC",
     text: "Donate, sponsor programs, or partner with us.",
     link: "/donations",
-    image: "/home/community-3.jpg",
+    image: "/home/support1.jpg",
   },
 ];
 
 export default function HomePage() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeAction, setActiveAction] = useState(0);
- 
+
   const slide = heroSlides[activeSlide];
   const action = actionSlides[activeAction];
 
@@ -144,7 +147,7 @@ export default function HomePage() {
             priority={index === 0}
             sizes="100vw"
             className={`object-cover transition-opacity duration-1000 ${
-              activeSlide === index ? "opacity-100" : "opacity-0"
+              activeSlide === index ? "opacity-100 hero-zoom" : "opacity-0"
             }`}
           />
         ))}
@@ -153,7 +156,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
 
         <div className="relative mx-auto flex min-h-[700px] max-w-7xl items-center px-6">
-          <div className="max-w-3xl">
+          <div key={activeSlide} className="max-w-3xl fade-up">
             <p className="mb-5 font-black uppercase tracking-widest text-yellow-400">
               {slide.label}
             </p>
@@ -219,29 +222,35 @@ export default function HomePage() {
       </section>
 
       <section className="relative z-10 -mt-4 px-6">
-  <div className="mx-auto grid max-w-6xl overflow-hidden rounded-3xl bg-white shadow-2xl md:grid-cols-4">
-    {highlights.map((item) => {
-      const Icon = item.icon;
+        <div className="mx-auto grid max-w-6xl overflow-hidden rounded-3xl bg-white shadow-2xl md:grid-cols-4">
+          {highlights.map((item) => {
+            const Icon = item.icon;
 
-      return (
-        <div
-          key={item.title}
-          className="border-b border-gray-200 p-8 text-center md:border-b-0 md:border-r last:border-r-0"
-        >
-          <Icon className="mx-auto mb-4 h-14 w-14 text-red-600" />
+            return (
+              <div
+                key={item.title}
+                className="border-b border-gray-200 p-8 text-center md:border-b-0 md:border-r last:border-r-0"
+              >
+                <Icon className="mx-auto mb-4 h-14 w-14 text-red-600" />
 
-          <h3 className="mb-3 text-2xl font-black text-gray-950">
-            {item.title}
-          </h3>
+                <h3 className="mb-3 text-2xl font-black text-gray-950">
+                  {item.title}
+                </h3>
 
-          <p className="text-gray-700">{item.text}</p>
+                <p className="text-gray-700">{item.text}</p>
+              </div>
+            );
+          })}
         </div>
-      );
-    })}
-  </div>
-</section>
+      </section>
 
-      <section className="bg-slate-100 px-6 py-18">
+      <Stats />
+
+      <WhyJoin/>
+
+      <LatestUpdates/>
+
+      <section className="bg-slate-100 px-6 py-16">
         <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-3">
           <div>
             <p className="mb-4 font-black uppercase tracking-widest text-red-600">
@@ -340,7 +349,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-slate-100 px-6 pb-18">
+      <section className="bg-slate-100 px-6 pb-16">
         <div className="mx-auto max-w-5xl text-center">
           <p className="mb-4 font-black uppercase tracking-widest text-red-600">
             Our Partners
@@ -377,7 +386,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-gray-100 px-6 py-18">
+      <section className="bg-gray-100 px-6 py-16">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto mb-14 max-w-3xl text-center">
             <p className="mb-4 font-black uppercase tracking-widest text-red-600">
@@ -423,59 +432,59 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-slate-100 px-6 py-18">
-  <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl bg-gray-950 px-10 py-24 text-white shadow-2xl md:px-14">
-    <Image
-      src="/home/vancouver-banner.jpg"
-      alt="British Columbia skyline"
-      fill
-      sizes="100vw"
-      className="object-cover"
-    />
+      <section className="bg-slate-100 px-6 py-16">
+        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl bg-gray-950 px-10 py-24 text-white shadow-2xl md:px-14">
+          <Image
+            src="/home/vancouver-banner.jpg"
+            alt="British Columbia skyline"
+            fill
+            sizes="100vw"
+            className="object-cover"
+          />
 
-    <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-black/50" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-black/50" />
 
-    <div className="relative grid items-center gap-10 md:grid-cols-2">
-      <div>
-        <p className="mb-4 font-black uppercase tracking-widest text-yellow-400">
-          Join USBC Today
-        </p>
+          <div className="relative grid items-center gap-10 md:grid-cols-2">
+            <div>
+              <p className="mb-4 font-black uppercase tracking-widest text-yellow-400">
+                Join USBC Today
+              </p>
 
-        <h2 className="mb-5 text-5xl font-black leading-tight md:text-5xl">
-          Be part of something bigger.
-        </h2>
+              <h2 className="mb-5 text-5xl font-black leading-tight md:text-5xl">
+                Be part of something bigger.
+              </h2>
 
-        <p className="max-w-xl text-lg leading-8 text-gray-200">
-          Join a growing community dedicated to unity, culture, service,
-          business support, and meaningful connection.
-        </p>
-      </div>
+              <p className="max-w-xl text-lg leading-8 text-gray-200">
+                Join a growing community dedicated to unity, culture, service,
+                business support, and meaningful connection.
+              </p>
+            </div>
 
-      <div className="flex flex-row items-center justify-end gap-4 md:whitespace-nowrap">
-        <Link
-          href="/membership"
-          className="rounded-xl bg-yellow-400 px-6 py-4 font-black text-black transition hover:bg-yellow-300"
-        >
-          Become a Member
-        </Link>
+            <div className="flex flex-row items-center justify-end gap-4 md:whitespace-nowrap">
+              <Link
+                href="/membership"
+                className="rounded-xl bg-yellow-400 px-6 py-4 font-black text-black transition hover:bg-yellow-300"
+              >
+                Become a Member
+              </Link>
 
-        <Link
-          href="/donations"
-          className="rounded-xl bg-red-600 px-8 py-4 font-black text-white transition hover:bg-red-700"
-        >
-          Donate
-        </Link>
+              <Link
+                href="/donations"
+                className="rounded-xl bg-red-600 px-8 py-4 font-black text-white transition hover:bg-red-700"
+              >
+                Donate
+              </Link>
 
-        <Link
-          href="/contact"
-          className="rounded-xl border border-white/50 px-8 py-4 font-black text-white transition hover:bg-white hover:text-black"
-        >
-          Contact USBC
-        </Link>
-      </div>
-    </div>
-  </div>
-</section>
+              <Link
+                href="/contact"
+                className="rounded-xl border border-white/50 px-8 py-4 font-black text-white transition hover:bg-white hover:text-black"
+              >
+                Contact USBC
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

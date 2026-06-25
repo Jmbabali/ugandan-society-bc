@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { sendApprovalEmail } from "@/lib/email";
+import AdminNav from "@/app/components/AdminNav";
 
 type Member = {
   id: number;
@@ -503,13 +504,6 @@ export default function AdminMembersPage() {
               className="rounded-xl bg-gray-950 px-6 py-4 font-bold text-white hover:bg-gray-800"
             >
               Export Members CSV
-            </button>
-
-            <button
-              onClick={handleLogout}
-              className="rounded-xl bg-red-600 px-6 py-4 font-bold text-white hover:bg-red-700"
-            >
-              Logout
             </button>
           </div>
         </div>
