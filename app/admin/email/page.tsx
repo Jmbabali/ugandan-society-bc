@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import emailjs from "@emailjs/browser";
 import { supabase } from "@/lib/supabase";
 
 type Member = {
@@ -16,10 +15,6 @@ type Member = {
 
 export default function AdminEmailPage() {
   const router = useRouter();
-
-  const EMAILJS_SERVICE_ID = "service_ubqt8tr";
-  const EMAILJS_TEMPLATE_ID = "template_dkreqpv";
-  const EMAILJS_PUBLIC_KEY = "5fuwosM5RJCHTr9v2";
 
   const [members, setMembers] = useState<Member[]>([]);
   const [recipientGroup, setRecipientGroup] = useState("All Members");
@@ -93,17 +88,22 @@ export default function AdminEmailPage() {
 
     for (const member of filteredRecipients) {
       try {
-        await emailjs.send(
-          EMAILJS_SERVICE_ID,
-          EMAILJS_TEMPLATE_ID,
-          {
-            to_email: member.email,
-            member_name: `${member.first_name} ${member.last_name}`,
-            subject,
-            message,
-          },
-          EMAILJS_PUBLIC_KEY
-        );
+        const response = await fetch("/api/send-broadcast-email", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    toEmail: member.email,
+    memberName: `${member.first_name} ${member.last_name}`,
+    subject,
+    message,
+  }),
+});
+
+if (!response.ok) {
+  throw new Error("Email failed");
+}
 
         successCount += 1;
       } catch {

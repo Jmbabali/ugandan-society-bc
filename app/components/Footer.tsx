@@ -52,7 +52,7 @@ export default function Footer() {
             <h3 className="mb-4 text-lg font-black text-yellow-400">Contact</h3>
 
             <div className="space-y-3 text-sm text-gray-300">
-              <p>ugandansocietybc@gmail.com</p>
+              <p>info@ugandansocietybc.ca</p>
               <p>British Columbia, Canada</p>
 
               <div className="mt-5 border-t border-white/10 pt-5 leading-7">

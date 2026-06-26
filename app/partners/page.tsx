@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const partners = [
-  { name: "Tamutamu", logo: "/partners/partner1.png", website: "https://www.tamutamu.co",},
+  { name: "Tamutamu", logo: "/partners/tamutamu.jpeg", website: "https://www.tamutamu.co",},
   { name: "Bytewave Innovations Limited", logo: "/partners/bytewave.png", website: "https://bytewaveinnovations.ca",},
 ];
 

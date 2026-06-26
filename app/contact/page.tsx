@@ -1,6 +1,42 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 export default function ContactPage() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+
+    const res = await fetch("/api/contact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ firstName, lastName, email, subject, message }),
+    });
+
+    setLoading(false);
+
+    if (res.ok) {
+      alert("Message sent successfully.");
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setSubject("");
+      setMessage("");
+    } else {
+      alert("Failed to send message.");
+    }
+  }
+
   return (
     <main className="min-h-screen bg-gray-100">
       <section className="bg-gray-950 px-6 py-20 text-white">
@@ -38,10 +74,10 @@ export default function ContactPage() {
             </p>
 
             <a
-              href="mailto:ugandansocietybc@gmail.com"
+              href="mailto:info@ugandansocietybc.ca"
               className="font-bold text-red-600 break-all"
             >
-              ugandansocietybc@gmail.com
+              info@ugandansocietybc.ca
             </a>
           </div>
 
@@ -65,9 +101,7 @@ export default function ContactPage() {
               🤝
             </div>
 
-            <h3 className="text-2xl font-black mb-3">
-              Partnerships
-            </h3>
+            <h3 className="text-2xl font-black mb-3">Partnerships</h3>
 
             <p className="text-gray-300">
               Interested in sponsoring an event, supporting a program, or
@@ -89,29 +123,28 @@ export default function ContactPage() {
             </h2>
 
             <p className="text-lg text-gray-700 mb-8">
-              Complete the form and a member of the USBC team will respond.
-              For now, this form is a design placeholder. Once connected, it can
-              send messages directly to the official USBC email.
+              Complete the form and a member of the USBC team will respond
+              through the official society email.
             </p>
 
             <div className="rounded-3xl bg-gray-950 p-8 text-white shadow-premium">
               <p className="text-yellow-400 uppercase tracking-widest font-bold mb-4">
-                Current Official Email
+                Official USBC Email
               </p>
 
               <p className="text-2xl font-black break-all">
-                ugandansocietybc@gmail.com
+                info@ugandansocietybc.ca
               </p>
 
               <p className="text-gray-300 mt-4">
-                Until the website form is connected, members and visitors can
-                contact USBC directly through this email address.
+                Members and visitors can contact USBC directly through this
+                email address.
               </p>
             </div>
           </div>
 
           <div className="rounded-3xl bg-gray-50 p-8 md:p-10 shadow-premium border">
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block mb-2 text-sm font-bold text-gray-700">
@@ -119,6 +152,9 @@ export default function ContactPage() {
                   </label>
 
                   <input
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
                     type="text"
                     className="w-full rounded-xl border border-gray-300 bg-white px-4 py-4 text-gray-950 outline-none focus:border-red-600"
                     placeholder="John"
@@ -131,6 +167,9 @@ export default function ContactPage() {
                   </label>
 
                   <input
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
                     type="text"
                     className="w-full rounded-xl border border-gray-300 bg-white px-4 py-4 text-gray-950 outline-none focus:border-red-600"
                     placeholder="Doe"
@@ -144,6 +183,9 @@ export default function ContactPage() {
                 </label>
 
                 <input
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   className="w-full rounded-xl border border-gray-300 bg-white px-4 py-4 text-gray-950 outline-none focus:border-red-600"
                   placeholder="you@example.com"
@@ -156,6 +198,9 @@ export default function ContactPage() {
                 </label>
 
                 <input
+                  required
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
                   type="text"
                   className="w-full rounded-xl border border-gray-300 bg-white px-4 py-4 text-gray-950 outline-none focus:border-red-600"
                   placeholder="Membership Inquiry"
@@ -168,6 +213,9 @@ export default function ContactPage() {
                 </label>
 
                 <textarea
+                  required
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
                   rows={6}
                   className="w-full rounded-xl border border-gray-300 bg-white px-4 py-4 text-gray-950 outline-none focus:border-red-600"
                   placeholder="Type your message here..."
@@ -175,10 +223,11 @@ export default function ContactPage() {
               </div>
 
               <button
-                type="button"
-                className="w-full rounded-xl bg-gray-950 px-8 py-4 font-bold text-white hover:bg-gray-800 transition"
+                disabled={loading}
+                type="submit"
+                className="w-full rounded-xl bg-gray-950 px-8 py-4 font-bold text-white hover:bg-gray-800 transition disabled:opacity-60"
               >
-                Send Message
+                {loading ? "Sending..." : "Send Message"}
               </button>
             </form>
           </div>

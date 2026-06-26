@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { sendApprovalEmail } from "@/lib/email";
 import AdminNav from "@/app/components/AdminNav";
 
 type Member = {
@@ -139,8 +138,11 @@ export default function AdminMembersPage() {
       const issueDateString = formatDate(issueDate);
       const expiryDateString = formatDate(expiryDate);
 
-      const cardLink = `http://localhost:3000/member-card/${newMemberId}`;
-      const qrCodeUrl = `http://localhost:3000/verify?id=${newMemberId}`;
+      const baseUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+const cardLink = `${baseUrl}/member-card/${newMemberId}`;
+const qrCodeUrl = `${baseUrl}/verify?id=${newMemberId}`;
 
       const { error } = await supabase
         .from("Members")
@@ -156,14 +158,24 @@ export default function AdminMembersPage() {
 
       if (error) throw error;
 
-      await sendApprovalEmail({
-        toEmail: member.email,
-        memberName: `${member.first_name} ${member.last_name}`,
-        memberId: newMemberId,
-        issueDate: issueDateString,
-        expiryDate: expiryDateString,
-        cardLink,
-      });
+      const response = await fetch("/api/send-approval-email", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    toEmail: member.email,
+    memberName: `${member.first_name} ${member.last_name}`,
+    memberId: newMemberId,
+    issueDate: issueDateString,
+    expiryDate: expiryDateString,
+    cardLink,
+  }),
+});
+
+if (!response.ok) {
+  throw new Error("Approval email could not be sent.");
+}
 
       setMessage(`${newMemberId} approved successfully and email sent.`);
       await loadMembers();

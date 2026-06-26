@@ -2,24 +2,31 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getAdminRole, canAccess } from "@/lib/adminAccess";
 
 const adminLinks = [
-  { name: "Dashboard", href: "/admin/dashboard" },
-  { name: "Members", href: "/admin/members" },
-  { name: "Events", href: "/admin/events" },
-  { name: "Email", href: "/admin/email" },
-  { name: "Renewals", href: "/admin/renewals" },
-  { name: "Businesses", href: "/admin/businesses" },
-  { name: "Gallery", href: "/admin/gallery" },
-  { name: "Updates", href: "/admin/updates" },
-  { name: "Donations", href: "/admin/donations" },
+  { name: "Dashboard", href: "/admin/dashboard", permission: "dashboard" },
+  { name: "Members", href: "/admin/members", permission: "members" },
+  { name: "Events", href: "/admin/events", permission: "events" },
+  { name: "Email", href: "/admin/email", permission: "email" },
+  { name: "Renewals", href: "/admin/renewals", permission: "renewals" },
+  { name: "Businesses", href: "/admin/businesses", permission: "businesses" },
+  { name: "Gallery", href: "/admin/gallery", permission: "gallery" },
+  { name: "Updates", href: "/admin/updates", permission: "updates" },
+  { name: "Donations", href: "/admin/donations", permission: "donations" },
+  { name: "Reports", href: "/admin/reports", permission: "reports" },
 ];
 
-export default function AdminNav() {
+  const role = getAdminRole();
+  export default function AdminNav() {
   const router = useRouter();
+  const role = getAdminRole();
 
   function handleLogout() {
     localStorage.removeItem("usbc_admin_logged_in");
+    localStorage.removeItem("usbc_admin_role");
+    localStorage.removeItem("usbc_admin_name");
+    localStorage.removeItem("usbc_admin_email");
     router.push("/admin/login");
   }
 
@@ -44,7 +51,9 @@ export default function AdminNav() {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        {adminLinks.map((item) => (
+        {adminLinks
+          .filter((item) => canAccess(role, item.permission))
+          .map((item) => (
           <Link
             key={item.href}
             href={item.href}

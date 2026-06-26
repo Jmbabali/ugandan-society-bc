@@ -79,7 +79,7 @@ const highlights = [
 const partners = [
   {
     name: "Tamutamu",
-    logo: "/partners/tamutamu.png",
+    logo: "/partners/tamutamu.jpeg",
     website: "https://www.tamutamu.co",
   },
   {
