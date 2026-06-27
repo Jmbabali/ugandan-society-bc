@@ -7,7 +7,7 @@ export default function Navbar() {
       <div className="border-b border-white/10 bg-black/30 px-6 py-2 text-xs text-gray-300">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <p>Building Connections • Preserving Heritage • Empowering Community</p>
-          <p className="hidden md:block">ugandansocietybc@gmail.com</p>
+          <p className="hidden md:block">info@ugandansocietybc.ca</p>
         </div>
       </div>
 

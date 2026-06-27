@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function AboutPage() {
   const values = [
@@ -15,23 +16,27 @@ export default function AboutPage() {
   const purposeCards = [
     {
       title: "Supporting Integration",
-      text: "Helping Ugandans in British Columbia participate fully in Canadian society.",
+      text: "Helping Ugandans in British Columbia settle, connect, and participate fully in Canadian society.",
     },
     {
       title: "Community Connection",
-      text: "Promoting understanding, cooperation, and meaningful engagement among Ugandans and friends of Uganda.",
+      text: "Creating spaces where Ugandans and friends of Uganda can network, collaborate, and support one another.",
     },
     {
       title: "Cultural Preservation",
-      text: "Preserving and promoting Ugandan cultures, traditions, and heritage in British Columbia.",
+      text: "Preserving and promoting Ugandan cultures, languages, traditions, values, and heritage across British Columbia.",
     },
     {
       title: "Newcomer Support",
-      text: "Assisting new Ugandan immigrants as they adjust, settle, and participate in BC communities.",
+      text: "Supporting new Ugandan immigrants as they adjust, build relationships, and access community resources.",
     },
     {
       title: "Civic Engagement",
-      text: "Encouraging active participation and positive contribution within Canadian communities.",
+      text: "Encouraging active participation, leadership, service, and positive contribution within Canadian communities.",
+    },
+    {
+      title: "Youth & Family Empowerment",
+      text: "Supporting families, youth, and future leaders through mentorship, engagement, and community programs.",
     },
   ];
 
@@ -41,144 +46,161 @@ export default function AboutPage() {
       role: "Chairperson",
       image: "/executives/abbey-kizito.jpg",
       initials: "AK",
-      bio: "Provides strategic leadership and oversight to support the Society’s mission and growth. A professional specializing in accounting and taxation, Abbey combines strong analytical expertise with a passion for community engagement, collaboration, and service.",
+      bio: "Provides strategic leadership and oversight to support the Society’s mission, governance, and long-term growth. Abbey brings professional experience in accounting, taxation, and community service.",
     },
     {
       name: "Louis Maruk",
       role: "Vice Chairperson",
       image: null,
       initials: "LM",
-      bio: "Supports the Chairperson in providing leadership and strategic direction for the Society. Louis is committed to strengthening community engagement, promoting collaboration, and supporting initiatives that advance USBC’s mission.",
+      bio: "Supports the Chairperson in leadership, planning, and community engagement. Louis helps strengthen collaboration and supports initiatives that advance USBC’s mission.",
     },
-    {
-      name: "Marion Nyiransaba",
-      role: "Secretary",
-      image: null,
-      initials: "MN",
-      bio: "Oversees organizational records, meeting documentation, and administrative coordination. Marion plays a vital role in supporting transparency, accountability, and effective communication.",
-    },
-    {
+        {
       name: "Babu Kigongo",
       role: "Treasurer",
       image: null,
       initials: "BK",
-      bio: "Oversees the Society’s financial management and supports long-term sustainability. A dedicated community leader and Co-Founder of All-Stars In Africa, Babu is passionate about youth development, mentorship, accountability, and responsible stewardship.",
+      bio: "Oversees financial management, reporting, and responsible stewardship. Babu is also a dedicated community leader and Co-Founder of All-Stars In Africa.",
     },
     {
       name: "John Mbabali",
       role: "Public Relations Officer",
       image: "/executives/john-mbabali.jpg",
       initials: "JM",
-      bio: "Leads communications, public engagement, and community outreach initiatives. An entrepreneur, innovator, and community leader, John is the Founder of Bytewave Innovations Limited and WOOSH Water Technologies.",
+      bio: "Leads communications, public engagement, and outreach. John is an entrepreneur, innovator, and Founder of Bytewave Innovations Limited and WOOSH Water Technologies.",
+    },
+    {
+      name: "Marion Nyiransaba",
+      role: "Secretary",
+      image: null,
+      initials: "MN",
+      bio: "Oversees organizational records, meeting documentation, and administrative coordination while supporting transparency, accountability, and effective communication.",
     },
     {
       name: "Rose Baliyo",
       role: "Fundraising Coordinator",
-      image: null,
+      image: "/executives/philda.jpeg",
       initials: "RB",
-      bio: "Coordinates fundraising initiatives and sponsorship opportunities that support community programs and events. Rose works with partners, donors, and supporters to help strengthen the Society’s impact.",
+      bio: "Hilda Baliyo, BSc (Accounting), MBA is an accounting and business professional with expertise in finance, administration, and strategic management. She holds a Bachelor of Science in Accounting and an MBA from University Canada West. As an Administrator at Gallant Law Corporation in Prince George, she oversees financial and administrative operations, including trust accounting, payroll, client services, and office management. Hilda is committed to integrity, excellence, and supporting the growth and success of the Ugandan community in British Columbia.",
     },
     {
       name: "Jackie Nakitende",
       role: "Welfare Coordinator",
       image: null,
       initials: "JN",
-      bio: "Supports the well-being of members through welfare initiatives, community support programs, and member engagement activities. Jackie is committed to fostering a caring and inclusive environment.",
+      bio: "Supports member well-being through welfare initiatives, community care, and member engagement programs that foster inclusion and belonging.",
     },
     {
       name: "Martin Ssemiriyo",
       role: "Events Coordinator",
       image: null,
       initials: "MS",
-      bio: "Leads the planning and delivery of cultural, social, and community events. Martin is committed to creating engaging experiences that strengthen community connections and celebrate Ugandan heritage.",
+      bio: "Leads the planning and delivery of cultural, social, and community events that strengthen connections and celebrate Ugandan heritage.",
     },
     {
       name: "George Kagugube",
       role: "Sports & Fitness Coordinator",
       image: null,
       initials: "GK",
-      bio: "Promotes health, wellness, and community engagement through sports and recreational activities. George encourages active participation, healthy lifestyles, teamwork, and community spirit.",
+      bio: "Promotes health, wellness, sports, recreation, teamwork, and active participation across the USBC community.",
     },
     {
       name: "Rogers Sserubiri",
       role: "Culture & Diversity Coordinator",
       image: null,
       initials: "RS",
-      bio: "Champions cultural preservation, diversity, and inclusion initiatives. Rogers works to celebrate Uganda’s rich cultural heritage while promoting understanding, respect, and intercultural engagement.",
+      bio: "Champions cultural preservation, diversity, inclusion, and intercultural engagement while celebrating Uganda’s rich heritage.",
     },
   ];
 
   return (
     <main className="min-h-screen bg-gray-100">
-      {/* Hero */}
-      <section className="bg-gray-950 px-6 py-20 text-white">
-        <div className="max-w-7xl mx-auto">
-          <p className="text-yellow-400 uppercase tracking-widest font-bold mb-4">
+      <section className="relative overflow-hidden bg-gray-950 px-6 py-24 text-white">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-yellow-400 blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-red-600 blur-3xl" />
+        </div>
+
+        <div className="relative mx-auto max-w-7xl">
+          <p className="mb-4 font-black uppercase tracking-[0.35em] text-yellow-400">
             Who We Are
           </p>
 
-          <h1 className="text-4xl md:text-6xl font-black mb-6 max-w-5xl">
+          <h1 className="max-w-5xl text-4xl font-black leading-tight md:text-7xl">
             Building Connections, Preserving Heritage, Empowering Community
           </h1>
 
-          <p className="text-lg md:text-xl text-gray-300 max-w-4xl">
+          <p className="mt-8 max-w-4xl text-lg leading-8 text-gray-300 md:text-xl">
             The Ugandan Society in BC (USBC) is a non-profit, non-partisan
             community organization dedicated to fostering unity, cultural pride,
-            and meaningful engagement among Ugandans and friends of Uganda
-            across British Columbia.
+            service, and meaningful engagement among Ugandans and friends of
+            Uganda across British Columbia.
           </p>
+
+          <div className="mt-10 flex flex-wrap gap-4">
+            <Link
+              href="/membership"
+              className="rounded-xl bg-yellow-400 px-7 py-4 font-black text-black hover:bg-yellow-300"
+            >
+              Become a Member
+            </Link>
+
+            <Link
+              href="/contact"
+              className="rounded-xl border border-white/20 bg-white/10 px-7 py-4 font-black text-white hover:bg-white/20"
+            >
+              Contact USBC
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Mission */}
       <section className="px-6 py-20">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-8">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-3">
           <div>
-            <p className="text-red-600 uppercase tracking-widest font-bold mb-4">
+            <p className="mb-4 font-black uppercase tracking-widest text-red-600">
               Our Mission
             </p>
 
-            <h2 className="text-3xl md:text-5xl font-black text-gray-950">
+            <h2 className="text-3xl font-black text-gray-950 md:text-5xl">
               A welcoming, safe, and empowering community.
             </h2>
           </div>
 
-          <div className="lg:col-span-2 rounded-3xl bg-gray-950 p-8 md:p-10 text-white shadow-premium">
-            <p className="text-xl md:text-2xl leading-relaxed text-gray-200">
-              “We strive to create a welcoming and safe environment where
+          <div className="rounded-3xl bg-gray-950 p-8 text-white shadow-xl lg:col-span-2 md:p-10">
+            <p className="text-xl leading-9 text-gray-200 md:text-2xl">
+              We strive to create a welcoming and safe environment where
               community members feel connected, supported, and empowered to
-              participate in their community and live meaningful and robust
-              lives.”
+              participate in their community and live meaningful lives.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Values */}
-      <section className="px-6 py-20 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="max-w-3xl mb-12">
-            <p className="text-red-600 uppercase tracking-widest font-bold mb-4">
+      <section className="bg-white px-6 py-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12 max-w-3xl">
+            <p className="mb-4 font-black uppercase tracking-widest text-red-600">
               Our Values
             </p>
 
-            <h2 className="text-3xl md:text-5xl font-black text-gray-950 mb-4">
+            <h2 className="mb-4 text-3xl font-black text-gray-950 md:text-5xl">
               The Principles That Guide Us
             </h2>
 
-            <p className="text-lg text-gray-700">
-              Our values shape how we serve, lead, communicate, and build trust
-              within the community.
+            <p className="text-lg leading-8 text-gray-700">
+              These values shape how we serve, lead, communicate, and build
+              trust within the community.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-4">
             {values.map((value) => (
               <div
                 key={value}
-                className="rounded-3xl bg-gray-50 p-6 shadow-premium border card-hover"
+                className="rounded-3xl border bg-gray-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
               >
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-yellow-400 font-black text-black">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-400 font-black text-black">
                   ✓
                 </div>
 
@@ -189,102 +211,104 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Purpose */}
       <section className="px-6 py-20">
-        <div className="max-w-7xl mx-auto">
-          <div className="max-w-3xl mb-12">
-            <p className="text-red-600 uppercase tracking-widest font-bold mb-4">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12 max-w-3xl">
+            <p className="mb-4 font-black uppercase tracking-widest text-red-600">
               Our Purpose
             </p>
 
-            <h2 className="text-3xl md:text-5xl font-black text-gray-950 mb-4">
+            <h2 className="mb-4 text-3xl font-black text-gray-950 md:text-5xl">
               Strengthening Community Through Service and Culture
             </h2>
 
-            <p className="text-lg text-gray-700">
+            <p className="text-lg leading-8 text-gray-700">
               USBC exists to support integration, preserve culture, strengthen
               community connection, and encourage participation in Canadian
               society.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {purposeCards.map((item) => (
               <div
                 key={item.title}
-                className="rounded-3xl bg-white p-8 shadow-premium border card-hover"
+                className="rounded-3xl border bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
               >
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-gray-950 font-black text-yellow-400">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-950 font-black text-yellow-400">
                   ✓
                 </div>
 
-                <h3 className="text-2xl font-black text-gray-950 mb-3">
+                <h3 className="mb-3 text-2xl font-black text-gray-950">
                   {item.title}
                 </h3>
 
-                <p className="text-gray-700">{item.text}</p>
+                <p className="leading-7 text-gray-700">{item.text}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Executive Team */}
-      <section className="px-6 py-20 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="max-w-3xl mb-12">
-            <p className="text-red-600 uppercase tracking-widest font-bold mb-4">
+      <section className="bg-white px-6 py-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12 max-w-4xl">
+            <p className="mb-4 font-black uppercase tracking-widest text-red-600">
               Executive Committee
             </p>
 
-            <h2 className="text-3xl md:text-5xl font-black text-gray-950 mb-4">
+            <h2 className="mb-4 text-3xl font-black text-gray-950 md:text-5xl">
               Meet the Leadership Team
             </h2>
 
-            <p className="text-lg text-gray-700">
+            <p className="text-lg leading-8 text-gray-700">
               USBC is led by community leaders committed to service,
               accountability, transparency, and community development.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
             {executiveTeam.map((member) => (
               <div
                 key={member.name}
-                className="rounded-3xl bg-gray-50 p-8 shadow-premium border card-hover"
+                className="overflow-hidden rounded-3xl border bg-gray-50 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
               >
-                <div className="mb-6 flex items-center gap-5">
-                  <div className="h-24 w-24 overflow-hidden rounded-2xl border bg-gray-200 shrink-0">
-                    {member.image ? (
-                      <Image
-                        src={member.image}
-                        alt={member.name}
-                        width={96}
-                        height={96}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gray-950 text-yellow-400 text-2xl font-black">
-                        {member.initials}
-                      </div>
-                    )}
+                <div className="h-2 bg-gradient-to-r from-black via-yellow-400 to-red-600" />
+
+                <div className="p-8">
+                  <div className="mb-6 flex items-center gap-5">
+                    <div className="h-24 w-24 shrink-0 overflow-hidden rounded-3xl border bg-gray-200">
+                      {member.image ? (
+                        <Image
+                          src={member.image}
+                          alt={member.name}
+                          width={96}
+                          height={96}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gray-950 text-2xl font-black text-yellow-400">
+                          {member.initials}
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <h3 className="text-xl font-black text-gray-950">
+                        {member.name}
+                      </h3>
+
+                      <p className="mt-1 text-sm font-black uppercase tracking-wide text-red-600">
+                        {member.role}
+                      </p>
+                    </div>
                   </div>
 
-                  <div>
-                    <h3 className="text-xl font-black text-gray-950">
-                      {member.name}
-                    </h3>
+                  <p className="leading-7 text-gray-700">{member.bio}</p>
 
-                    <p className="mt-1 text-sm font-bold text-red-600">
-                      {member.role}
-                    </p>
+                  <div className="mt-6 border-t pt-4 text-sm font-bold text-gray-500">
+                    Executive Committee
                   </div>
-                </div>
-
-                <p className="text-gray-700">{member.bio}</p>
-
-                <div className="mt-6 border-t pt-4 text-sm font-bold text-gray-500">
-                  Executive Committee
                 </div>
               </div>
             ))}
@@ -292,25 +316,24 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Governance */}
       <section className="px-6 py-20">
-        <div className="max-w-7xl mx-auto">
-          <div className="max-w-3xl mb-12">
-            <p className="text-red-600 uppercase tracking-widest font-bold mb-4">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12 max-w-3xl">
+            <p className="mb-4 font-black uppercase tracking-widest text-red-600">
               Governance
             </p>
 
-            <h2 className="text-3xl md:text-5xl font-black text-gray-950 mb-4">
+            <h2 className="mb-4 text-3xl font-black text-gray-950 md:text-5xl">
               Leadership Structure
             </h2>
 
-            <p className="text-lg text-gray-700">
+            <p className="text-lg leading-8 text-gray-700">
               USBC operates through a structured leadership model that supports
               accountability, oversight, and effective community service.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid gap-6 md:grid-cols-3">
             {[
               {
                 title: "Board of Trustees",
@@ -327,41 +350,43 @@ export default function AboutPage() {
             ].map((item) => (
               <div
                 key={item.title}
-                className="rounded-3xl bg-white p-8 shadow-premium border card-hover"
+                className="rounded-3xl border bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
               >
-                <h3 className="text-2xl font-black text-gray-950 mb-4">
+                <h3 className="mb-4 text-2xl font-black text-gray-950">
                   {item.title}
                 </h3>
 
-                <p className="text-gray-700">{item.text}</p>
+                <p className="leading-7 text-gray-700">{item.text}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Constitution */}
-      <section className="px-6 py-20 bg-gray-950 text-white">
-        <div className="max-w-7xl mx-auto rounded-3xl border border-white/10 bg-white/10 p-8 md:p-12 shadow-premium md:flex items-center justify-between gap-8">
+      <section className="bg-gray-950 px-6 py-20 text-white">
+        <div className="mx-auto flex max-w-7xl flex-col gap-8 rounded-3xl border border-white/10 bg-white/10 p-8 shadow-xl md:flex-row md:items-center md:justify-between md:p-12">
           <div>
-            <p className="text-yellow-400 uppercase tracking-widest font-bold mb-4">
+            <p className="mb-4 font-black uppercase tracking-widest text-yellow-400">
               Constitution & Bylaws
             </p>
 
-            <h2 className="text-3xl md:text-5xl font-black mb-4">
+            <h2 className="mb-4 text-3xl font-black md:text-5xl">
               Guided by Clear Governance
             </h2>
 
-            <p className="text-gray-300 max-w-3xl">
+            <p className="max-w-3xl leading-8 text-gray-300">
               USBC is guided by its Constitution and Bylaws, which outline the
               organization’s mission, objectives, membership, leadership
               structure, elections, governance, and accountability.
             </p>
           </div>
 
-          <button className="mt-8 md:mt-0 rounded-xl bg-yellow-400 px-8 py-4 font-bold text-black hover:bg-yellow-300 transition">
+          <Link
+            href="/resources"
+            className="rounded-xl bg-yellow-400 px-8 py-4 text-center font-black text-black hover:bg-yellow-300"
+          >
             View Constitution
-          </button>
+          </Link>
         </div>
       </section>
     </main>

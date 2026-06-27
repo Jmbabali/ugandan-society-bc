@@ -1,7 +1,29 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function Footer() {
+  const [settings, setSettings] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    async function loadSettings() {
+      const { data } = await supabase.from("system_settings").select("*");
+
+      const values: Record<string, string> = {};
+
+      data?.forEach((item: any) => {
+        values[item.setting_key] = item.setting_value || "";
+      });
+
+      setSettings(values);
+    }
+
+    loadSettings();
+  }, []);
+
   return (
     <footer className="bg-[#0b0b0b] text-white">
       <div className="h-1 w-full bg-gradient-to-r from-black via-yellow-400 to-red-600" />
@@ -29,22 +51,60 @@ export default function Footer() {
             <h3 className="mb-4 text-lg font-black text-yellow-400">Explore</h3>
 
             <ul className="space-y-3 text-sm text-gray-300">
-              <li><Link href="/about" className="hover:text-yellow-400">About Us</Link></li>
-              <li><Link href="/membership" className="hover:text-yellow-400">Membership</Link></li>
-              <li><Link href="/events" className="hover:text-yellow-400">Events</Link></li>
-              <li><Link href="/gallery" className="hover:text-yellow-400">Gallery</Link></li>
-              <li><Link href="/resources" className="hover:text-yellow-400">Resources</Link></li>
+              <li>
+                <Link href="/about" className="hover:text-yellow-400">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link href="/membership" className="hover:text-yellow-400">
+                  Membership
+                </Link>
+              </li>
+              <li>
+                <Link href="/events" className="hover:text-yellow-400">
+                  Events
+                </Link>
+              </li>
+              <li>
+                <Link href="/gallery" className="hover:text-yellow-400">
+                  Gallery
+                </Link>
+              </li>
+              <li>
+                <Link href="/resources" className="hover:text-yellow-400">
+                  Resources
+                </Link>
+              </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="mb-4 text-lg font-black text-yellow-400">Community</h3>
+            <h3 className="mb-4 text-lg font-black text-yellow-400">
+              Community
+            </h3>
 
             <ul className="space-y-3 text-sm text-gray-300">
-              <li><Link href="/business-hub" className="hover:text-yellow-400">Business Hub</Link></li>
-              <li><Link href="/partners" className="hover:text-yellow-400">Partners & Sponsors</Link></li>
-              <li><Link href="/donations" className="hover:text-yellow-400">Donations</Link></li>
-              <li><Link href="/contact" className="hover:text-yellow-400">Contact Us</Link></li>
+              <li>
+                <Link href="/business-hub" className="hover:text-yellow-400">
+                  Business Hub
+                </Link>
+              </li>
+              <li>
+                <Link href="/partners" className="hover:text-yellow-400">
+                  Partners & Sponsors
+                </Link>
+              </li>
+              <li>
+                <Link href="/donations" className="hover:text-yellow-400">
+                  Donations
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-yellow-400">
+                  Contact Us
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -52,8 +112,8 @@ export default function Footer() {
             <h3 className="mb-4 text-lg font-black text-yellow-400">Contact</h3>
 
             <div className="space-y-3 text-sm text-gray-300">
-              <p>info@ugandansocietybc.ca</p>
-              <p>British Columbia, Canada</p>
+              <p>{settings.email || "info@ugandansocietybc.ca"}</p>
+              <p>{settings.address || "British Columbia, Canada"}</p>
 
               <div className="mt-5 border-t border-white/10 pt-5 leading-7">
                 <p>Building Connections.</p>
@@ -66,7 +126,8 @@ export default function Footer() {
 
         <div className="flex flex-col items-center justify-between gap-5 pt-6 text-center md:flex-row md:text-left">
           <p className="text-sm text-gray-400">
-            © 2026 Ugandan Society in BC (USBC). All Rights Reserved.
+            {settings.footer_text ||
+              `© ${new Date().getFullYear()} Ugandan Society in BC (USBC). All Rights Reserved.`}
           </p>
 
           <p className="text-sm text-gray-400">

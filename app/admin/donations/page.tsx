@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import AdminGuard from "@/app/components/AdminGuard";
 
 type Donation = {
   id: number;
@@ -64,12 +65,12 @@ export default function AdminDonationsPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-100">
-        <p className="rounded-3xl bg-white p-8 font-bold shadow-xl">
-          Loading donations...
-        </p>
-      </main>
-    );
+  <AdminGuard permission="donations">
+    <main className="min-h-screen bg-gray-100">
+      ...
+    </main>
+  </AdminGuard>
+);
   }
 
   return (

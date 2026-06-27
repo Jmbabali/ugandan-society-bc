@@ -21,9 +21,47 @@ export const roleLabels: Record<AdminRole, string> = {
 
 export const permissions: Record<AdminRole, string[]> = {
   super_admin: ["all"],
-  president: ["all"],
-  vice_president: ["all"],
-  pro: ["all"],
+
+president: [
+  "dashboard",
+  "members",
+  "events_registrations",
+  "events",
+  "email",
+  "renewals",
+  "businesses",
+  "gallery",
+  "updates",
+  "donations",
+  "reports",
+  "payments",
+],
+
+vice_president: [
+  "dashboard",
+  "members",
+   "events_registrations",
+  "events",
+  "email",
+  "renewals",
+  "businesses",
+  "gallery",
+  "updates",
+  "donations",
+  "reports",
+  "payments",
+],
+  pro: [
+  "dashboard",
+  "members",
+  "events",
+  "event_registrations",
+  "email",
+  "businesses",
+  "gallery",
+  "updates",
+  "reports",
+],
 
   secretary: ["dashboard", "members", "reports", "renewals"],
 

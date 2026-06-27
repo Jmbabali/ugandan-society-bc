@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import bcrypt from "bcryptjs";
 import { supabase } from "@/lib/supabase";
 
 export default function AdminLoginPage() {
@@ -14,24 +15,38 @@ export default function AdminLoginPage() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+
     setLoggingIn(true);
     setMessage("Checking admin access...");
-
-    if (password !== "USBC2026Admin") {
-      setMessage("Incorrect admin password.");
-      setLoggingIn(false);
-      return;
-    }
 
     const { data: admin, error } = await supabase
       .from("Admins")
       .select("*")
       .eq("email", email.toLowerCase().trim())
-      .eq("status", "Active")
       .maybeSingle();
 
     if (error || !admin) {
-      setMessage("No active admin account found for this email.");
+      setMessage("Invalid email or password.");
+      setLoggingIn(false);
+      return;
+    }
+
+    if (admin.status !== "Active") {
+      setMessage("This admin account is not active.");
+      setLoggingIn(false);
+      return;
+    }
+
+    if (!admin.password_hash) {
+      setMessage("Password has not been set for this admin account.");
+      setLoggingIn(false);
+      return;
+    }
+
+    const passwordMatches = await bcrypt.compare(password, admin.password_hash);
+
+    if (!passwordMatches) {
+      setMessage("Invalid email or password.");
       setLoggingIn(false);
       return;
     }
@@ -41,12 +56,17 @@ export default function AdminLoginPage() {
     localStorage.setItem("usbc_admin_name", admin.display_name);
     localStorage.setItem("usbc_admin_email", admin.email);
 
+    if (admin.force_password_change === true) {
+      router.push("/admin/change-password");
+      return;
+    }
+
     router.push("/admin/dashboard");
   }
 
   return (
     <main className="min-h-screen bg-gray-100 px-6 py-20">
-      <div className="mx-auto max-w-md rounded-3xl border bg-white p-8 shadow-premium">
+      <div className="mx-auto max-w-md rounded-3xl border bg-white p-8 shadow-xl">
         <p className="mb-4 font-bold uppercase tracking-widest text-red-600">
           USBC Admin
         </p>

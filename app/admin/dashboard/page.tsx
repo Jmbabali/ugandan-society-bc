@@ -1,432 +1,396 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import AdminGuard from "@/app/components/AdminGuard";
 import { supabase } from "@/lib/supabase";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import {
+  AlertTriangle,
+  BriefcaseBusiness,
+  CalendarDays,
+  DollarSign,
+  Gift,
+  Mail,
+  RefreshCcw,
+  Settings,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 
 export default function AdminDashboardPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [adminName, setAdminName] = useState("Executive");
+  const [lastUpdated, setLastUpdated] = useState("");
 
   const [stats, setStats] = useState({
     totalMembers: 0,
     approvedMembers: 0,
     pendingMembers: 0,
-    rejectedMembers: 0,
     expiredMembers: 0,
     paidMembers: 0,
     unpaidMembers: 0,
     revenue: 0,
     totalEvents: 0,
-    totalRegistrations: 0,
     totalBusinesses: 0,
-    approvedBusinesses: 0,
     pendingBusinesses: 0,
+    totalDonations: 0,
+    donationsAmount: 0,
   });
 
   const [recentMembers, setRecentMembers] = useState<any[]>([]);
-  const [recentRegistrations, setRecentRegistrations] = useState<any[]>([]);
   const [recentBusinesses, setRecentBusinesses] = useState<any[]>([]);
+  const [recentEvents, setRecentEvents] = useState<any[]>([]);
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("usbc_admin_logged_in");
-
-    if (isLoggedIn !== "true") {
-      router.push("/admin/login");
-      return;
-    }
-
+    setAdminName(localStorage.getItem("usbc_admin_name") || "Executive");
     loadDashboard();
-  }, [router]);
+  }, []);
 
   async function loadDashboard() {
-    const { data: members } = await supabase.from("Members").select("*");
-    const { data: events } = await supabase.from("Events").select("*");
-    const { data: registrations } = await supabase
-      .from("EventRegistrations")
-      .select("*");
-    const { data: businesses } = await supabase.from("Businesses").select("*");
+    setLoading(true);
+
+    const [
+      { data: members },
+      { data: events },
+      { data: businesses },
+      { data: donations },
+    ] = await Promise.all([
+      supabase.from("Members").select("*"),
+      supabase.from("Events").select("*"),
+      supabase.from("Businesses").select("*"),
+      supabase.from("Donations").select("*"),
+    ]);
 
     const today = new Date();
 
-    const totalMembers = members?.length || 0;
-    const approvedMembers =
-      members?.filter((m) => m.status === "Approved").length || 0;
-    const pendingMembers =
-      members?.filter((m) => m.status === "Pending").length || 0;
-    const rejectedMembers =
-      members?.filter((m) => m.status === "Rejected").length || 0;
-    const expiredMembers =
-      members?.filter((m) => m.expiry_date && new Date(m.expiry_date) < today)
-        .length || 0;
-    const paidMembers =
-      members?.filter((m) => m.payment_status === "Paid").length || 0;
-    const unpaidMembers =
-      members?.filter((m) => m.payment_status !== "Paid").length || 0;
+    const memberRows = members || [];
+    const eventRows = events || [];
+    const businessRows = businesses || [];
+    const donationRows = donations || [];
 
-    const revenue =
-      members?.reduce((sum, m) => sum + Number(m.payment_amount || 0), 0) || 0;
+    const revenue = memberRows.reduce(
+      (sum, m) => sum + Number(m.payment_amount || 0),
+      0
+    );
 
-    const totalBusinesses = businesses?.length || 0;
-    const approvedBusinesses =
-      businesses?.filter((b) => b.status === "Approved").length || 0;
-    const pendingBusinesses =
-      businesses?.filter((b) => b.status === "Pending").length || 0;
+    const donationsAmount = donationRows.reduce(
+      (sum, d) => sum + Number(d.amount || 0),
+      0
+    );
 
     setStats({
-      totalMembers,
-      approvedMembers,
-      pendingMembers,
-      rejectedMembers,
-      expiredMembers,
-      paidMembers,
-      unpaidMembers,
+      totalMembers: memberRows.length,
+      approvedMembers: memberRows.filter((m) => m.status === "Approved").length,
+      pendingMembers: memberRows.filter((m) => m.status === "Pending").length,
+      expiredMembers: memberRows.filter(
+        (m) => m.expiry_date && new Date(m.expiry_date) < today
+      ).length,
+      paidMembers: memberRows.filter((m) => m.payment_status === "Paid").length,
+      unpaidMembers: memberRows.filter((m) => m.payment_status !== "Paid").length,
       revenue,
-      totalEvents: events?.length || 0,
-      totalRegistrations: registrations?.length || 0,
-      totalBusinesses,
-      approvedBusinesses,
-      pendingBusinesses,
+      totalEvents: eventRows.length,
+      totalBusinesses: businessRows.length,
+      pendingBusinesses: businessRows.filter((b) => b.status === "Pending")
+        .length,
+      totalDonations: donationRows.length,
+      donationsAmount,
     });
 
     setRecentMembers(
-      [...(members || [])].sort((a, b) => b.id - a.id).slice(0, 5)
-    );
-
-    setRecentRegistrations(
-      [...(registrations || [])].sort((a, b) => b.id - a.id).slice(0, 5)
+      [...memberRows].sort((a, b) => Number(b.id) - Number(a.id)).slice(0, 5)
     );
 
     setRecentBusinesses(
-      [...(businesses || [])].sort((a, b) => b.id - a.id).slice(0, 5)
+      [...businessRows].sort((a, b) => Number(b.id) - Number(a.id)).slice(0, 5)
     );
 
-    setLoading(false);
-  }
+    setRecentEvents(
+      [...eventRows]
+        .sort(
+          (a, b) =>
+            new Date(b.event_date || b.created_at || 0).getTime() -
+            new Date(a.event_date || a.created_at || 0).getTime()
+        )
+        .slice(0, 5)
+    );
 
-  function percentage(value: number, total: number) {
-    if (!total) return 0;
-    return Math.round((value / total) * 100);
+    setLastUpdated(new Date().toLocaleString());
+    setLoading(false);
   }
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-100">
-        <p className="rounded-3xl bg-white p-8 font-bold shadow-xl">
-          Loading Dashboard...
-        </p>
-      </main>
+      <AdminGuard permission="dashboard">
+        <main className="min-h-screen">
+          <div className="rounded-3xl bg-white p-8 font-bold shadow">
+            Loading dashboard...
+          </div>
+        </main>
+      </AdminGuard>
     );
   }
 
-  const memberApprovalRate = percentage(
-    stats.approvedMembers,
-    stats.totalMembers
-  );
+  return (
+    <AdminGuard permission="dashboard">
+      <main className="min-h-screen">
+        <section className="mb-8 overflow-hidden rounded-[2rem] bg-gray-950 p-8 text-white shadow-2xl">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="font-black uppercase tracking-widest text-yellow-400">
+                Welcome back,
+              </p>
 
-  const paymentRate = percentage(stats.paidMembers, stats.totalMembers);
+              <h1 className="mt-2 text-5xl font-black">{adminName}</h1>
 
-  const businessApprovalRate = percentage(
-    stats.approvedBusinesses,
-    stats.totalBusinesses
+              <p className="mt-4 max-w-3xl text-lg text-gray-300">
+                Here&apos;s what&apos;s happening across the Ugandan Society in BC
+                today.
+              </p>
+
+              <p className="mt-3 text-sm font-bold text-gray-400">
+                Last updated: {lastUpdated || "Loading..."}
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-center">
+              <ShieldCheck className="mx-auto h-12 w-12 text-yellow-400" />
+              <p className="mt-3 text-sm font-bold uppercase text-gray-300">
+                Secure Portal
+              </p>
+              <p className="text-2xl font-black">USBC</p>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            <QuickButton href="/admin/members" icon={<Users />} label="Members" />
+            <QuickButton href="/admin/events" icon={<CalendarDays />} label="Events" />
+            <QuickButton href="/admin/email" icon={<Mail />} label="Send Email" />
+            <QuickButton href="/admin/admin-users" icon={<Settings />} label="Admin Users" />
+
+            <button
+              onClick={loadDashboard}
+              className="flex items-center gap-2 rounded-xl bg-red-600 px-5 py-3 font-bold text-white hover:bg-red-700"
+            >
+              <RefreshCcw className="h-5 w-5" />
+              Refresh
+            </button>
+          </div>
+        </section>
+
+        <section className="mb-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard icon={<Users />} title="Total Members" value={stats.totalMembers} note={`${stats.approvedMembers} approved`} color="dark" />
+          <StatCard icon={<AlertTriangle />} title="Pending Approvals" value={stats.pendingMembers} note="Members waiting review" color="yellow" />
+          <StatCard icon={<DollarSign />} title="Membership Revenue" value={`$${stats.revenue.toFixed(2)}`} note={`${stats.paidMembers} paid members`} color="green" />
+          <StatCard icon={<AlertTriangle />} title="Expired Members" value={stats.expiredMembers} note="Require renewal follow-up" color="red" />
+          <StatCard icon={<CalendarDays />} title="Events" value={stats.totalEvents} note="Total events created" color="blue" />
+          <StatCard icon={<BriefcaseBusiness />} title="Businesses" value={stats.totalBusinesses} note={`${stats.pendingBusinesses} pending approval`} color="purple" />
+          <StatCard icon={<Gift />} title="Donations" value={`$${stats.donationsAmount.toFixed(2)}`} note={`${stats.totalDonations} donation records`} color="green" />
+          <StatCard icon={<DollarSign />} title="Unpaid Members" value={stats.unpaidMembers} note="Payment not completed" color="red" />
+        </section>
+
+        <section className="mb-8 grid gap-6 lg:grid-cols-3">
+          <ActionCard title="Member Approvals" description="Review applications, issue member IDs, and manage membership records." href="/admin/members" button="Review Members" />
+          <ActionCard title="Business Approvals" description="Approve or reject businesses submitted to the community directory." href="/admin/businesses" button="Review Businesses" />
+          <ActionCard title="Executive Access" description="Manage passwords, roles, permissions, and executive accounts." href="/admin/admin-users" button="Manage Access" />
+        </section>
+
+        <section className="grid gap-6 xl:grid-cols-3">
+          <Panel title="Recent Members" href="/admin/members">
+            {recentMembers.length === 0 ? (
+              <Empty text="No recent members." />
+            ) : (
+              recentMembers.map((member) => (
+                <Record
+                  key={member.id}
+                  title={`${member.first_name || ""} ${member.last_name || ""}`}
+                  line1={member.member_id || "Pending member ID"}
+                  line2={member.status || "No status"}
+                />
+              ))
+            )}
+          </Panel>
+
+          <Panel title="Recent Businesses" href="/admin/businesses">
+            {recentBusinesses.length === 0 ? (
+              <Empty text="No recent businesses." />
+            ) : (
+              recentBusinesses.map((business) => (
+                <Record
+                  key={business.id}
+                  title={business.business_name || "Unnamed business"}
+                  line1={business.category || "No category"}
+                  line2={business.status || "No status"}
+                />
+              ))
+            )}
+          </Panel>
+
+          <Panel title="Recent Events" href="/admin/events">
+            {recentEvents.length === 0 ? (
+              <Empty text="No recent events." />
+            ) : (
+              recentEvents.map((event) => (
+                <Record
+                  key={event.id}
+                  title={event.title || "Untitled event"}
+                  line1={
+                    event.event_date
+                      ? new Date(event.event_date).toLocaleDateString()
+                      : "No date"
+                  }
+                  line2={event.location || "No location"}
+                />
+              ))
+            )}
+          </Panel>
+        </section>
+      </main>
+    </AdminGuard>
   );
+}
+
+function QuickButton({
+  href,
+  icon,
+  label,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-2 rounded-xl bg-white px-5 py-3 font-bold text-gray-950 hover:bg-yellow-400"
+    >
+      <span className="[&>svg]:h-5 [&>svg]:w-5">{icon}</span>
+      {label}
+    </Link>
+  );
+}
+
+function StatCard({
+  icon,
+  title,
+  value,
+  note,
+  color,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  value: string | number;
+  note: string;
+  color: "dark" | "green" | "yellow" | "red" | "blue" | "purple";
+}) {
+  const accents: Record<string, string> = {
+    dark: "bg-gray-950",
+    green: "bg-green-600",
+    yellow: "bg-yellow-400",
+    red: "bg-red-600",
+    blue: "bg-blue-600",
+    purple: "bg-purple-600",
+  };
+
+  const iconStyles: Record<string, string> = {
+    dark: "bg-gray-950 text-white",
+    green: "bg-green-100 text-green-700",
+    yellow: "bg-yellow-100 text-yellow-700",
+    red: "bg-red-100 text-red-700",
+    blue: "bg-blue-100 text-blue-700",
+    purple: "bg-purple-100 text-purple-700",
+  };
 
   return (
-    <main className="min-h-screen bg-gray-100 px-6 py-12">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-10">
-          <p className="mb-3 font-bold uppercase tracking-widest text-red-600">
-            USBC Executive Dashboard
-          </p>
-
-          <h1 className="text-5xl font-black text-gray-950">
-            Organization Overview
-          </h1>
-
-          <p className="mt-4 max-w-3xl text-lg text-gray-700">
-            A real-time overview of membership, revenue, events, registrations,
-            and business directory activity.
-          </p>
-        </div>
-
-        <div className="mb-10 grid gap-4 md:grid-cols-4">
-          <div className="rounded-3xl bg-gray-950 p-7 text-white shadow">
-            <p className="text-sm font-bold uppercase text-gray-300">
-              Total Members
-            </p>
-            <p className="mt-3 text-5xl font-black">{stats.totalMembers}</p>
-            <p className="mt-2 text-sm text-gray-300">
-              {stats.approvedMembers} approved members
-            </p>
+    <div className="overflow-hidden rounded-3xl bg-white shadow-lg transition hover:-translate-y-1 hover:shadow-xl">
+      <div className={`h-2 ${accents[color]}`} />
+      <div className="p-6">
+        <div className="flex items-center gap-4">
+          <div className={`rounded-2xl p-3 ${iconStyles[color]}`}>
+            <span className="[&>svg]:h-7 [&>svg]:w-7">{icon}</span>
           </div>
 
-          <div className="rounded-3xl bg-white p-7 shadow">
-            <p className="text-sm font-bold uppercase text-gray-500">
-              Membership Revenue
-            </p>
-            <p className="mt-3 text-5xl font-black text-green-700">
-              ${stats.revenue.toFixed(2)}
-            </p>
-            <p className="mt-2 text-sm text-gray-600">
-              From paid membership records
-            </p>
-          </div>
-
-          <div className="rounded-3xl bg-white p-7 shadow">
-            <p className="text-sm font-bold uppercase text-gray-500">Events</p>
-            <p className="mt-3 text-5xl font-black">{stats.totalEvents}</p>
-            <p className="mt-2 text-sm text-gray-600">
-              {stats.totalRegistrations} total registrations
-            </p>
-          </div>
-
-          <div className="rounded-3xl bg-white p-7 shadow">
-            <p className="text-sm font-bold uppercase text-gray-500">
-              Businesses
-            </p>
-            <p className="mt-3 text-5xl font-black">
-              {stats.totalBusinesses}
-            </p>
-            <p className="mt-2 text-sm text-gray-600">
-              {stats.approvedBusinesses} approved listings
-            </p>
-          </div>
-        </div>
-
-        <div className="mb-10 grid gap-6 lg:grid-cols-3">
-          <div className="rounded-3xl bg-white p-8 shadow">
-            <h2 className="mb-6 text-2xl font-black text-gray-950">
-              Membership Health
-            </h2>
-
-            <div className="space-y-5">
-              <div>
-                <div className="mb-2 flex justify-between text-sm font-bold">
-                  <span>Approval Rate</span>
-                  <span>{memberApprovalRate}%</span>
-                </div>
-                <div className="h-4 rounded-full bg-gray-200">
-                  <div
-                    className="h-4 rounded-full bg-green-600"
-                    style={{ width: `${memberApprovalRate}%` }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="mb-2 flex justify-between text-sm font-bold">
-                  <span>Payment Rate</span>
-                  <span>{paymentRate}%</span>
-                </div>
-                <div className="h-4 rounded-full bg-gray-200">
-                  <div
-                    className="h-4 rounded-full bg-yellow-400"
-                    style={{ width: `${paymentRate}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-4">
-                <div className="rounded-2xl bg-green-50 p-4">
-                  <p className="text-sm text-gray-500">Approved</p>
-                  <p className="text-3xl font-black text-green-700">
-                    {stats.approvedMembers}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-yellow-50 p-4">
-                  <p className="text-sm text-gray-500">Pending</p>
-                  <p className="text-3xl font-black text-yellow-700">
-                    {stats.pendingMembers}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-red-50 p-4">
-                  <p className="text-sm text-gray-500">Rejected</p>
-                  <p className="text-3xl font-black text-red-700">
-                    {stats.rejectedMembers}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-gray-100 p-4">
-                  <p className="text-sm text-gray-500">Expired</p>
-                  <p className="text-3xl font-black text-gray-950">
-                    {stats.expiredMembers}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-white p-8 shadow">
-            <h2 className="mb-6 text-2xl font-black text-gray-950">
-              Payment Summary
-            </h2>
-
-            <div className="grid gap-4">
-              <div className="rounded-2xl bg-green-50 p-5">
-                <p className="text-sm font-bold uppercase text-gray-500">
-                  Paid Members
-                </p>
-                <p className="mt-2 text-4xl font-black text-green-700">
-                  {stats.paidMembers}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-red-50 p-5">
-                <p className="text-sm font-bold uppercase text-gray-500">
-                  Unpaid / Pending
-                </p>
-                <p className="mt-2 text-4xl font-black text-red-700">
-                  {stats.unpaidMembers}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-gray-950 p-5 text-white">
-                <p className="text-sm font-bold uppercase text-gray-300">
-                  Total Revenue
-                </p>
-                <p className="mt-2 text-4xl font-black">
-                  ${stats.revenue.toFixed(2)}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-white p-8 shadow">
-            <h2 className="mb-6 text-2xl font-black text-gray-950">
-              Business Directory
-            </h2>
-
-            <div>
-              <div className="mb-2 flex justify-between text-sm font-bold">
-                <span>Approval Rate</span>
-                <span>{businessApprovalRate}%</span>
-              </div>
-              <div className="mb-6 h-4 rounded-full bg-gray-200">
-                <div
-                  className="h-4 rounded-full bg-gray-950"
-                  style={{ width: `${businessApprovalRate}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-4">
-              <div className="rounded-2xl bg-white p-5 shadow-sm border">
-                <p className="text-sm font-bold uppercase text-gray-500">
-                  Total Businesses
-                </p>
-                <p className="mt-2 text-4xl font-black">
-                  {stats.totalBusinesses}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-green-50 p-5">
-                <p className="text-sm font-bold uppercase text-gray-500">
-                  Approved
-                </p>
-                <p className="mt-2 text-4xl font-black text-green-700">
-                  {stats.approvedBusinesses}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-yellow-50 p-5">
-                <p className="text-sm font-bold uppercase text-gray-500">
-                  Pending
-                </p>
-                <p className="mt-2 text-4xl font-black text-yellow-700">
-                  {stats.pendingBusinesses}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-10 grid gap-4 md:grid-cols-4">
-          <Link
-            href="/admin/members"
-            className="rounded-3xl bg-gray-950 p-8 text-center font-bold text-white hover:bg-gray-800"
-          >
-            Manage Members
-          </Link>
-
-          <Link
-            href="/admin/events"
-            className="rounded-3xl bg-yellow-400 p-8 text-center font-bold text-black hover:bg-yellow-300"
-          >
-            Manage Events
-          </Link>
-
-          <Link
-            href="/admin/businesses"
-            className="rounded-3xl bg-white p-8 text-center font-bold shadow hover:bg-gray-50"
-          >
-            Manage Businesses
-          </Link>
-
-          <button
-            onClick={loadDashboard}
-            className="rounded-3xl bg-white p-8 text-center font-bold shadow hover:bg-gray-50"
-          >
-            Refresh Dashboard
-          </button>
-        </div>
-
-        <div className="grid gap-8 lg:grid-cols-3">
-          <div className="rounded-3xl bg-white p-8 shadow">
-            <h2 className="mb-6 text-2xl font-black">Recent Members</h2>
-
-            <div className="space-y-4">
-              {recentMembers.map((member) => (
-                <div key={member.id} className="rounded-xl border p-4">
-                  <p className="font-black">
-                    {member.first_name} {member.last_name}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {member.member_id || "Pending ID"}
-                  </p>
-                  <p className="text-sm text-gray-600">{member.status}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-white p-8 shadow">
-            <h2 className="mb-6 text-2xl font-black">
-              Recent Event Registrations
-            </h2>
-
-            <div className="space-y-4">
-              {recentRegistrations.map((registration) => (
-                <div key={registration.id} className="rounded-xl border p-4">
-                  <p className="font-black">{registration.member_name}</p>
-                  <p className="text-sm text-gray-600">
-                    Event #{registration.event_id}
-                  </p>
-                  <p className="text-sm text-green-700">
-                    {registration.status}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-white p-8 shadow">
-            <h2 className="mb-6 text-2xl font-black">Recent Businesses</h2>
-
-            <div className="space-y-4">
-              {recentBusinesses.map((business) => (
-                <div key={business.id} className="rounded-xl border p-4">
-                  <p className="font-black">{business.business_name}</p>
-                  <p className="text-sm text-gray-600">{business.category}</p>
-                  <p className="text-sm text-gray-600">{business.status}</p>
-                </div>
-              ))}
-            </div>
+          <div>
+            <p className="text-sm font-black uppercase text-gray-500">{title}</p>
+            <p className="mt-2 text-4xl font-black text-gray-950">{value}</p>
+            <p className="mt-1 text-sm font-semibold text-gray-500">{note}</p>
           </div>
         </div>
       </div>
-    </main>
+    </div>
+  );
+}
+
+function ActionCard({
+  title,
+  description,
+  href,
+  button,
+}: {
+  title: string;
+  description: string;
+  href: string;
+  button: string;
+}) {
+  return (
+    <div className="rounded-3xl bg-white p-7 shadow-lg">
+      <h2 className="text-2xl font-black text-gray-950">{title}</h2>
+      <p className="mt-3 leading-7 text-gray-600">{description}</p>
+
+      <Link
+        href={href}
+        className="mt-6 inline-block rounded-xl bg-gray-950 px-5 py-3 font-bold text-white hover:bg-gray-800"
+      >
+        {button}
+      </Link>
+    </div>
+  );
+}
+
+function Panel({
+  title,
+  href,
+  children,
+}: {
+  title: string;
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-3xl bg-white p-7 shadow-lg">
+      <div className="mb-5 flex items-center justify-between">
+        <h2 className="text-2xl font-black text-gray-950">{title}</h2>
+        <Link href={href} className="font-bold text-blue-600 hover:underline">
+          View all
+        </Link>
+      </div>
+
+      <div className="space-y-4">{children}</div>
+    </section>
+  );
+}
+
+function Record({
+  title,
+  line1,
+  line2,
+}: {
+  title: string;
+  line1: string;
+  line2: string;
+}) {
+  return (
+    <div className="rounded-2xl border p-4 hover:bg-gray-50">
+      <p className="font-black text-gray-950">{title}</p>
+      <p className="mt-1 text-sm text-gray-600">{line1}</p>
+      <p className="text-sm text-gray-500">{line2}</p>
+    </div>
+  );
+}
+
+function Empty({ text }: { text: string }) {
+  return (
+    <p className="rounded-2xl bg-gray-50 p-5 text-sm font-bold text-gray-500">
+      {text}
+    </p>
   );
 }
