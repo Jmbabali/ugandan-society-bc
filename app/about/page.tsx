@@ -58,9 +58,9 @@ export default function AboutPage() {
         {
       name: "Babu Kigongo",
       role: "Treasurer",
-      image: null,
+      image: "/executives/babu.jpg",
       initials: "BK",
-      bio: "Babu serves as the Treasurer of the Ugandan Society in BC, bringing strong leadership, accountability, and a commitment to serving the community. He is the Co-Founder and Director of All Stars In Africa, a nonprofit organization that empowers vulnerable children in Uganda through sports, mentorship, and leadership development.With a passion for community building and youth empowerment, Babu works to promote transparency, sound financial stewardship, and sustainable growth within the Society. His dedication to service, integrity, and collaboration continues to strengthen both the Ugandan community in British Columbia and the lives of young people through his charitable work.",
+      bio: "Babu serves as the Treasurer of the Ugandan Society in BC, bringing a strong commitment to faith, service, leadership, and community development. He is an entrepreneur and nonprofit leader who owns Deezee Contracting, a construction business serving clients across the Lower Mainland. Together with his wife, Danae Tracey, Babu also founded AllStars in Africa, an organization dedicated to creating lasting impact in communities in Uganda. Babu also serves with Athletes in Action, where he uses sports as a platform to mentor, disciple, and inspire athletes and coaches in faith and leadership. He believes sports have the power to transform lives, build character, and strengthen communities. Beyond his professional and community work, Babu is a devoted husband and proud father of two sons, Zeke and Zion. He enjoys music, discovering great food, and connecting with people from diverse backgrounds. In all areas of life, Babu strives to live with faith, purpose, and service.",
     },
     {
       name: "John Mbabali",

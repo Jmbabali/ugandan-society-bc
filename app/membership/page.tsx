@@ -21,6 +21,7 @@ export default function MembershipPage() {
   const [photo, setPhoto] = useState<File | null>(null);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [membershipAgreement, setMembershipAgreement] = useState("");
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -68,6 +69,10 @@ export default function MembershipPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (membershipAgreement !== "I agree") {
+  alert("You must agree to the membership terms before registration can be processed.");
+  return;
+}
     setSubmitting(true);
     setMessage("Submitting application...");
 
@@ -329,6 +334,48 @@ export default function MembershipPage() {
               from USBC.
             </span>
           </label>
+
+          <div className="rounded-3xl border bg-yellow-50 p-6">
+  <h3 className="text-2xl font-black text-gray-950">
+    Confirmation of Membership
+  </h3>
+
+  <p className="mt-4 leading-7 text-gray-700">
+    By paying the membership fee, the member acknowledges and agrees to the
+    terms outlined in this document.
+  </p>
+
+  <p className="mt-3 font-bold text-gray-950">
+    Accept the terms by indicating “I agree” below. Otherwise, indicate
+    “I do not agree.” Registration will only be processed for those who agree
+    to the membership terms above.
+  </p>
+
+  <div className="mt-5 grid gap-3">
+    <label className="flex items-center gap-3 rounded-xl bg-white p-4 font-bold">
+      <input
+        type="radio"
+        name="membershipAgreement"
+        value="I agree"
+        checked={membershipAgreement === "I agree"}
+        onChange={(e) => setMembershipAgreement(e.target.value)}
+        required
+      />
+      I agree
+    </label>
+
+    <label className="flex items-center gap-3 rounded-xl bg-white p-4 font-bold">
+      <input
+        type="radio"
+        name="membershipAgreement"
+        value="I do not agree"
+        checked={membershipAgreement === "I do not agree"}
+        onChange={(e) => setMembershipAgreement(e.target.value)}
+      />
+      I do not agree
+    </label>
+  </div>
+</div>
 
           <button
             type="submit"

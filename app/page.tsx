@@ -10,13 +10,13 @@ import LatestUpdates from "./components/LatestUpdates";
 
 const heroSlides = [
   {
-    image: "/home/community-3.jpg",
+    image: "/home/compic.jpg",
     label: "Ugandan Society in BC",
     title: "A Stronger Ugandan Community in British Columbia",
     text: "Connecting families, professionals, students, entrepreneurs, newcomers, and friends of Uganda through culture, service, business, and community support.",
   },
   {
-    image: "/home/community-2.jpg",
+    image: "/home/connection.jpg",
     label: "Community Connection",
     title: "Building Connections Across British Columbia",
     text: "USBC brings people together through events, networking, outreach, family support, and shared community participation.",
@@ -37,19 +37,19 @@ const heroSlides = [
 
 const actionSlides = [
   {
-    main: "/home/community-2.jpg",
-    sideTop: "/home/community-3.jpg",
-    sideBottom: "/home/community-4.jpg",
+    main: "/home/team.jpg",
+    sideTop: "/home/bbq2.jpg",
+    sideBottom: "/home/dance.jpg",
   },
   {
-    main: "/home/community-3.jpg",
-    sideTop: "/home/community-4.jpg",
-    sideBottom: "/home/community-1.jpg",
+    main: "/home/registration.jpg",
+    sideTop: "/home/abbots.jpg",
+    sideBottom: "/home/event.jpg",
   },
   {
-    main: "/home/community-4.jpg",
-    sideTop: "/home/community-1.jpg",
-    sideBottom: "/home/community-2.jpg",
+    main: "/home/bbq.jpg",
+    sideTop: "/home/vibes.jpg",
+    sideBottom: "/home/bbq3.jpg",
   },
 ];
 

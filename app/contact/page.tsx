@@ -91,8 +91,7 @@ export default function ContactPage() {
             </h3>
 
             <p className="text-gray-700">
-              Serving Ugandans, families, newcomers, professionals, and friends
-              of Uganda across British Columbia, Canada.
+              PO BOX 14024 RPO Trethewey, Abbotsford, British Columbia, V2T 0B4.
             </p>
           </div>
 
