@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     }
 
     const baseUrl =
-      process.env.NEXT_PUBLIC_SITE_URL || "https://ugandansocietybc.ca";
+      process.env.NEXT_PUBLIC_SITE_URL || "https://www.ugandansocietybc.ca";
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],

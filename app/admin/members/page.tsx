@@ -53,6 +53,30 @@ export default function AdminMembersPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newMember, setNewMember] = useState(emptyMember);
   const [uploading, setUploading] = useState(false);
+  const [editingMember, setEditingMember] = useState<Member | null>(null);
+
+const [editForm, setEditForm] = useState({
+  first_name: "",
+  last_name: "",
+  email: "",
+  phone: "",
+  membership_type: "",
+  member_category: "",
+  status: "",
+});
+function startEdit(member: Member) {
+  setEditingMember(member);
+
+  setEditForm({
+    first_name: member.first_name,
+    last_name: member.last_name,
+    email: member.email,
+    phone: member.phone,
+    membership_type: member.membership_type,
+    member_category: member.member_category,
+    status: member.status,
+  });
+}
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("usbc_admin_logged_in");
@@ -65,6 +89,23 @@ export default function AdminMembersPage() {
     setCheckingLogin(false);
     loadMembers();
   }, [router]);
+
+  async function saveMember() {
+  if (!editingMember) return;
+
+  const { error } = await supabase
+    .from("Members")
+    .update(editForm)
+    .eq("id", editingMember.id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  setEditingMember(null);
+  loadMembers();
+}
 
   async function loadMembers() {
     const { data, error } = await supabase
@@ -149,6 +190,7 @@ export default function AdminMembersPage() {
           issue_date: issueDateString,
           expiry_date: expiryDateString,
           emergency_contact: newMember.emergency_contact,
+          photo_url: newMember.photo_url,
           approved_by: "USBC Admin",
           qr_code: qrCodeUrl,
         },
@@ -156,7 +198,23 @@ export default function AdminMembersPage() {
 
       if (error) throw error;
 
-      setMessage(`${memberId} added successfully.`);
+       const cardLink = `${baseUrl}/member-card/${memberId}`;
+
+await fetch("/api/send-approval-email", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    toEmail: newMember.email,
+    memberName: `${newMember.first_name} ${newMember.last_name}`,
+    memberId,
+    issueDate: issueDateString,
+    expiryDate: expiryDateString,
+    cardLink,
+  }),
+});
+      setMessage(`${memberId} added successfully and confirmation email sent.`);
       setNewMember(emptyMember);
       setShowAddForm(false);
       await loadMembers();
@@ -250,6 +308,78 @@ async function uploadPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     ...newMember,
     photo_url: data.publicUrl,
   });
+}
+
+async function approveMember(member: Member) {
+  const memberId = await getNextMemberId();
+
+  const issueDate = new Date();
+  const expiryDate = new Date();
+  expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
+  const issueDateString = formatDate(issueDate);
+  const expiryDateString = formatDate(expiryDate);
+
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://www.ugandansocietybc.ca";
+
+  const cardLink = `${baseUrl}/member-card/${memberId}`;
+  const qrCodeUrl = `${baseUrl}/verify?id=${memberId}`;
+
+  const { error } = await supabase
+    .from("Members")
+    .update({
+  member_id: memberId,
+  status: "Approved",
+  payment_status: "Paid",
+  payment_method: "Stripe",
+  payment_date: new Date().toISOString(),
+  issue_date: issueDateString,
+  expiry_date: expiryDateString,
+  approved_by: "USBC Admin",
+  qr_code: qrCodeUrl,
+})
+    .eq("id", member.id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  await fetch("/api/send-approval-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      toEmail: member.email,
+      memberName: `${member.first_name} ${member.last_name}`,
+      memberId,
+      issueDate: issueDateString,
+      expiryDate: expiryDateString,
+      cardLink,
+    }),
+  });
+
+  await loadMembers();
+}
+
+async function rejectMember(member: Member) {
+  const confirmed = confirm(
+    `Reject ${member.first_name} ${member.last_name}?`
+  );
+
+  if (!confirmed) return;
+
+  const { error } = await supabase
+    .from("Members")
+    .update({ status: "Rejected" })
+    .eq("id", member.id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  await loadMembers();
 }
 
   if (checkingLogin) {
@@ -518,21 +648,55 @@ async function uploadPhoto(e: React.ChangeEvent<HTMLInputElement>) {
 
                 <div className="flex flex-col gap-3">
                   {member.member_id && (
-                    <a
-                      href={`/member-card/${member.member_id}`}
-                      target="_blank"
-                      className="rounded-xl bg-gray-950 px-5 py-3 text-center font-bold text-white hover:bg-gray-800"
-                    >
-                      View Card
-                    </a>
-                  )}
+  <a
+    href={`/member-card/${member.member_id}`}
+    target="_blank"
+    className="rounded-xl bg-gray-950 px-5 py-3 text-center font-bold text-white hover:bg-gray-800"
+  >
+    View Card
+  </a>
+)}
 
-                  <button
-                    onClick={() => deleteMember(member)}
-                    className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
+{member.status === "Pending" && (
+  <>
+    <button
+      onClick={() => approveMember(member)}
+      className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white hover:bg-green-700"
+    >
+      Approve
+    </button>
+
+    <button
+      onClick={() => rejectMember(member)}
+      className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white hover:bg-red-700"
+    >
+      Reject
+    </button>
+  </>
+)}
+
+<button
+  onClick={() => startEdit(member)}
+  className="rounded-xl bg-yellow-400 px-5 py-3 font-bold text-black hover:bg-yellow-300"
+>
+  Edit
+</button>
+
+{member.payment_status === "Pending Online Payment" && (
+  <button
+    onClick={() => approveMember(member)}
+    className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white hover:bg-green-700"
+  >
+    Approve & Mark Paid
+  </button>
+)}
+
+<button
+  onClick={() => deleteMember(member)}
+  className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white hover:bg-red-700"
+>
+  Delete
+</button>
                 </div>
               </div>
             </div>
@@ -545,6 +709,72 @@ async function uploadPhoto(e: React.ChangeEvent<HTMLInputElement>) {
           </p>
         )}
       </div>
+
+      {editingMember && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-3xl p-8 w-full max-w-xl space-y-4">
+
+      <h2 className="text-3xl font-bold">
+        Edit Member
+      </h2>
+
+      <input
+        value={editForm.first_name}
+        onChange={(e)=>
+          setEditForm({...editForm, first_name:e.target.value})
+        }
+        className="w-full border rounded-xl p-3"
+        placeholder="First Name"
+      />
+
+      <input
+        value={editForm.last_name}
+        onChange={(e)=>
+          setEditForm({...editForm, last_name:e.target.value})
+        }
+        className="w-full border rounded-xl p-3"
+        placeholder="Last Name"
+      />
+
+      <input
+        value={editForm.email}
+        onChange={(e)=>
+          setEditForm({...editForm, email:e.target.value})
+        }
+        className="w-full border rounded-xl p-3"
+        placeholder="Email"
+      />
+
+      <input
+        value={editForm.phone}
+        onChange={(e)=>
+          setEditForm({...editForm, phone:e.target.value})
+        }
+        className="w-full border rounded-xl p-3"
+        placeholder="Phone"
+      />
+
+      <div className="flex gap-3">
+
+        <button
+          onClick={saveMember}
+          className="flex-1 bg-green-600 text-white rounded-xl py-3 font-bold"
+        >
+          Save
+        </button>
+
+        <button
+          onClick={() => setEditingMember(null)}
+          className="flex-1 bg-gray-300 rounded-xl py-3 font-bold"
+        >
+          Cancel
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
     </main>
   );
 }

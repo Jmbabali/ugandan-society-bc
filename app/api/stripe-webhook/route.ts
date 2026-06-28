@@ -6,7 +6,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 export async function POST(request: Request) {
@@ -30,15 +30,32 @@ export async function POST(request: Request) {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
 
-      const { error } = await supabaseAdmin
+      const memberId = session.metadata?.member_id;
+
+      if (memberId) {
+        const { error } = await supabaseAdmin
+          .from("Members")
+          .update({
+            payment_status: "Paid",
+            payment_method: "Stripe",
+            payment_date: new Date().toISOString(),
+          })
+          .eq("member_id", memberId);
+
+        if (error) {
+          console.error("Member payment update error:", error);
+        }
+      }
+
+      const { error: donationError } = await supabaseAdmin
         .from("Donations")
         .update({
           payment_status: "Paid",
         })
         .eq("stripe_session_id", session.id);
 
-      if (error) {
-        console.error("Donation update error:", error);
+      if (donationError) {
+        console.error("Donation update error:", donationError);
       }
     }
 
@@ -46,9 +63,6 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error("Stripe webhook error:", error.message);
 
-    return NextResponse.json(
-      { error: "Webhook error." },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Webhook error." }, { status: 400 });
   }
 }
