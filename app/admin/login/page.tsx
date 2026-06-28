@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import bcrypt from "bcryptjs";
-import { supabase } from "@/lib/supabase";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -19,49 +17,41 @@ export default function AdminLoginPage() {
     setLoggingIn(true);
     setMessage("Checking admin access...");
 
-    const { data: admin, error } = await supabase
-      .from("Admins")
-      .select("*")
-      .eq("email", email.toLowerCase().trim())
-      .maybeSingle();
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
 
-    if (error || !admin) {
-      setMessage("Invalid email or password.");
+      const result = await response.json();
+
+      if (!response.ok) {
+        setMessage(result.error || "Invalid email or password.");
+        setLoggingIn(false);
+        return;
+      }
+
+      localStorage.setItem("usbc_admin_logged_in", "true");
+      localStorage.setItem("usbc_admin_role", result.admin.role);
+      localStorage.setItem("usbc_admin_name", result.admin.display_name);
+      localStorage.setItem("usbc_admin_email", result.admin.email);
+
+      if (result.admin.force_password_change === true) {
+        router.push("/admin/change-password");
+        return;
+      }
+
+      router.push("/admin/dashboard");
+    } catch {
+      setMessage("Unable to login. Please try again.");
       setLoggingIn(false);
-      return;
     }
-
-    if (admin.status !== "Active") {
-      setMessage("This admin account is not active.");
-      setLoggingIn(false);
-      return;
-    }
-
-    if (!admin.password_hash) {
-      setMessage("Password has not been set for this admin account.");
-      setLoggingIn(false);
-      return;
-    }
-
-    const passwordMatches = await bcrypt.compare(password, admin.password_hash);
-
-    if (!passwordMatches) {
-      setMessage("Invalid email or password.");
-      setLoggingIn(false);
-      return;
-    }
-
-    localStorage.setItem("usbc_admin_logged_in", "true");
-    localStorage.setItem("usbc_admin_role", admin.role);
-    localStorage.setItem("usbc_admin_name", admin.display_name);
-    localStorage.setItem("usbc_admin_email", admin.email);
-
-    if (admin.force_password_change === true) {
-      router.push("/admin/change-password");
-      return;
-    }
-
-    router.push("/admin/dashboard");
   }
 
   return (

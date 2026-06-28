@@ -58,7 +58,7 @@ export default function AboutPage() {
         {
       name: "Babu Kigongo",
       role: "Treasurer",
-      image: "/executives/marion.jpg",
+      image: "/executives/babu.jpg",
       initials: "BK",
       bio: "Babu serves as the Treasurer of the Ugandan Society in BC, bringing strong leadership, accountability, and a commitment to serving the community. He is the Co-Founder and Director of All Stars In Africa, a nonprofit organization that empowers vulnerable children in Uganda through sports, mentorship, and leadership development.With a passion for community building and youth empowerment, Babu works to promote transparency, sound financial stewardship, and sustainable growth within the Society. His dedication to service, integrity, and collaboration continues to strengthen both the Ugandan community in British Columbia and the lives of young people through his charitable work.",
     },
@@ -100,7 +100,7 @@ export default function AboutPage() {
     {
       name: "George Kagugube",
       role: "Sports & Fitness Coordinator",
-      image: "/executives/marion.jpg",
+      image: "/executives/george.jpg",
       initials: "GK",
       bio: "Promotes health, wellness, sports, recreation, teamwork, and active participation across the USBC community.",
     },
