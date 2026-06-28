@@ -58,7 +58,7 @@ export default function AboutPage() {
         {
       name: "Babu Kigongo",
       role: "Treasurer",
-      image: "/executives/babu.jpg",
+      image: "/executives/kigongo.bmp",
       initials: "BK",
       bio: "Babu serves as the Treasurer of the Ugandan Society in BC, bringing a strong commitment to faith, service, leadership, and community development. He is an entrepreneur and nonprofit leader who owns Deezee Contracting, a construction business serving clients across the Lower Mainland. Together with his wife, Danae Tracey, Babu also founded AllStars in Africa, an organization dedicated to creating lasting impact in communities in Uganda. Babu also serves with Athletes in Action, where he uses sports as a platform to mentor, disciple, and inspire athletes and coaches in faith and leadership. He believes sports have the power to transform lives, build character, and strengthen communities. Beyond his professional and community work, Babu is a devoted husband and proud father of two sons, Zeke and Zion. He enjoys music, discovering great food, and connecting with people from diverse backgrounds. In all areas of life, Babu strives to live with faith, purpose, and service.",
     },
