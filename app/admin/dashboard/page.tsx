@@ -68,12 +68,20 @@ export default function AdminDashboardPage() {
     const businessRows = businesses || [];
     const donationRows = donations || [];
 
-    const revenue = memberRows.reduce(
+    const paidMembers = memberRows.filter(
+      (m) => m.payment_status === "Paid"
+    );
+
+    const paidDonations = donationRows.filter(
+      (d) => d.payment_status === "Paid"
+    );
+
+    const revenue = paidMembers.reduce(
       (sum, m) => sum + Number(m.payment_amount || 0),
       0
     );
 
-    const donationsAmount = donationRows.reduce(
+    const donationsAmount = paidDonations.reduce(
       (sum, d) => sum + Number(d.amount || 0),
       0
     );
@@ -85,14 +93,15 @@ export default function AdminDashboardPage() {
       expiredMembers: memberRows.filter(
         (m) => m.expiry_date && new Date(m.expiry_date) < today
       ).length,
-      paidMembers: memberRows.filter((m) => m.payment_status === "Paid").length,
-      unpaidMembers: memberRows.filter((m) => m.payment_status !== "Paid").length,
+      paidMembers: paidMembers.length,
+      unpaidMembers: memberRows.filter((m) => m.payment_status !== "Paid")
+        .length,
       revenue,
       totalEvents: eventRows.length,
       totalBusinesses: businessRows.length,
       pendingBusinesses: businessRows.filter((b) => b.status === "Pending")
         .length,
-      totalDonations: donationRows.length,
+      totalDonations: paidDonations.length,
       donationsAmount,
     });
 
@@ -180,11 +189,11 @@ export default function AdminDashboardPage() {
         <section className="mb-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard icon={<Users />} title="Total Members" value={stats.totalMembers} note={`${stats.approvedMembers} approved`} color="dark" />
           <StatCard icon={<AlertTriangle />} title="Pending Approvals" value={stats.pendingMembers} note="Members waiting review" color="yellow" />
-          <StatCard icon={<DollarSign />} title="Membership Revenue" value={`$${stats.revenue.toFixed(2)}`} note={`${stats.paidMembers} paid members`} color="green" />
+          <StatCard icon={<DollarSign />} title="Membership Revenue" value={`$${stats.revenue.toFixed(2)}`} note={`${stats.paidMembers} paid members only`} color="green" />
           <StatCard icon={<AlertTriangle />} title="Expired Members" value={stats.expiredMembers} note="Require renewal follow-up" color="red" />
           <StatCard icon={<CalendarDays />} title="Events" value={stats.totalEvents} note="Total events created" color="blue" />
           <StatCard icon={<BriefcaseBusiness />} title="Businesses" value={stats.totalBusinesses} note={`${stats.pendingBusinesses} pending approval`} color="purple" />
-          <StatCard icon={<Gift />} title="Donations" value={`$${stats.donationsAmount.toFixed(2)}`} note={`${stats.totalDonations} donation records`} color="green" />
+          <StatCard icon={<Gift />} title="Paid Donations" value={`$${stats.donationsAmount.toFixed(2)}`} note={`${stats.totalDonations} completed donations`} color="green" />
           <StatCard icon={<DollarSign />} title="Unpaid Members" value={stats.unpaidMembers} note="Payment not completed" color="red" />
         </section>
 
