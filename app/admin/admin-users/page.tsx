@@ -1,8 +1,6 @@
 "use client";
 
 import AdminGuard from "@/app/components/AdminGuard";
-import { supabase } from "@/lib/supabase";
-import bcrypt from "bcryptjs";
 import { useEffect, useMemo, useState } from "react";
 
 type AdminUser = {
@@ -49,21 +47,19 @@ export default function AdminUsersPage() {
   }, []);
 
   async function loadUsers() {
-    setLoading(true);
+  setLoading(true);
 
-    const { data, error } = await supabase
-      .from("Admins")
-      .select("*")
-      .order("display_name");
+  const response = await fetch("/api/admin/users");
+  const result = await response.json();
 
-    if (error) {
-      setMessage(error.message);
-    } else {
-      setUsers(data || []);
-    }
-
-    setLoading(false);
+  if (!response.ok) {
+    setMessage(result.error || "Unable to load users.");
+  } else {
+    setUsers(result.users || []);
   }
+
+  setLoading(false);
+}
 
   function openAddForm() {
     setEditingUser(null);
@@ -91,121 +87,146 @@ export default function AdminUsersPage() {
     setMessage("");
   }
 
-  async function saveUser(e: React.FormEvent) {
-    e.preventDefault();
-    setMessage("Saving...");
+ async function saveUser(e: React.FormEvent) {
+  e.preventDefault();
+  setMessage("Saving...");
 
-    const payload: any = {
-      display_name: form.display_name.trim(),
-      email: form.email.toLowerCase().trim(),
+  const response = await fetch("/api/admin/users", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action: editingUser ? "update" : "create",
+      id: editingUser?.id,
+      display_name: form.display_name,
+      email: form.email,
       role: form.role,
       status: form.status,
-    };
+      password: form.password,
+    }),
+  });
 
-    if (form.password.trim()) {
-      payload.password_hash = await bcrypt.hash(form.password.trim(), 10);
-    }
+  const result = await response.json();
 
-    if (editingUser) {
-      const { error } = await supabase
-        .from("Admins")
-        .update(payload)
-        .eq("id", editingUser.id);
-
-      if (error) {
-        setMessage(error.message);
-        return;
-      }
-
-      setMessage("Executive updated successfully.");
-    } else {
-      if (!form.password.trim()) {
-        setMessage("Please enter a password for the new executive.");
-        return;
-      }
-
-      const { error } = await supabase.from("Admins").insert(payload);
-
-      if (error) {
-        setMessage(error.message);
-        return;
-      }
-
-      setMessage("Executive added successfully.");
-    }
-
-    setShowForm(false);
-    await loadUsers();
+  if (!response.ok) {
+    setMessage(result.error || "Unable to save executive.");
+    return;
   }
+
+  setMessage(
+    editingUser
+      ? "Executive updated successfully."
+      : "Executive added successfully."
+  );
+
+  setShowForm(false);
+  await loadUsers();
+}
 
   async function resetPassword(user: AdminUser) {
-    const newPassword = prompt(
-      `Enter a new password for ${user.display_name}:`
-    );
+  const newPassword = prompt(
+    `Enter a new password for ${user.display_name}:`
+  );
 
-    if (!newPassword) return;
+  if (!newPassword) return;
 
-    const password_hash = await bcrypt.hash(newPassword, 10);
+  const response = await fetch("/api/admin/users", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action: "resetPassword",
+      id: user.id,
+      password: newPassword,
+    }),
+  });
 
-    const { error } = await supabase
-      .from("Admins")
-      .update({ password_hash })
-      .eq("id", user.id);
+  const result = await response.json();
 
-    if (error) {
-      setMessage(error.message);
-      return;
-    }
-
-    setMessage(`Password reset successfully for ${user.display_name}.`);
-    await loadUsers();
+  if (!response.ok) {
+    setMessage(result.error);
+    return;
   }
 
-  async function toggleStatus(user: AdminUser) {
-    const newStatus = user.status === "Active" ? "Inactive" : "Active";
+  setMessage(`Password reset successfully for ${user.display_name}.`);
+  await loadUsers();
+}
 
-    const confirmed = confirm(
+  async function toggleStatus(user: AdminUser) {
+  const newStatus =
+    user.status === "Active" ? "Inactive" : "Active";
+
+  if (
+    !confirm(
       `${newStatus === "Active" ? "Activate" : "Disable"} ${
         user.display_name
       }?`
-    );
-
-    if (!confirmed) return;
-
-    const { error } = await supabase
-      .from("Admins")
-      .update({ status: newStatus })
-      .eq("id", user.id);
-
-    if (error) {
-      setMessage(error.message);
-      return;
-    }
-
-    setMessage(`Executive ${newStatus === "Active" ? "activated" : "disabled"}.`);
-    await loadUsers();
+    )
+  ) {
+    return;
   }
 
-  async function deleteUser(user: AdminUser) {
-    if (user.role === "super_admin") {
-      alert("Super Admin accounts cannot be deleted from here.");
-      return;
-    }
+  const response = await fetch("/api/admin/users", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action: "toggleStatus",
+      id: user.id,
+      status: newStatus,
+    }),
+  });
 
-    const confirmed = confirm(`Delete ${user.display_name}?`);
-    if (!confirmed) return;
+  const result = await response.json();
 
-    const { error } = await supabase.from("Admins").delete().eq("id", user.id);
-
-    if (error) {
-      setMessage(error.message);
-      return;
-    }
-
-    setMessage("Executive deleted.");
-    await loadUsers();
+  if (!response.ok) {
+    setMessage(result.error);
+    return;
   }
 
+  setMessage(
+    `Executive ${
+      newStatus === "Active" ? "activated" : "disabled"
+    }.`
+  );
+
+  await loadUsers();
+}
+
+ async function deleteUser(user: AdminUser) {
+  if (user.role === "super_admin") {
+    alert("Super Admin accounts cannot be deleted.");
+    return;
+  }
+
+  if (!confirm(`Delete ${user.display_name}?`)) {
+    return;
+  }
+
+  const response = await fetch("/api/admin/users", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action: "delete",
+      id: user.id,
+    }),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    setMessage(result.error);
+    return;
+  }
+
+  setMessage("Executive deleted.");
+  await loadUsers();
+}
   const filtered = useMemo(() => {
     return users.filter((user) => {
       const text = `${user.display_name} ${user.email}`.toLowerCase();
