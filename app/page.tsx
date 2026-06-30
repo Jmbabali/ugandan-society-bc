@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Users, Music, HeartHandshake, TrendingUp } from "lucide-react";
 import Stats from "./components/Stats";
 import WhyJoin from "./components/WhyJoin";
@@ -134,6 +134,20 @@ export default function HomePage() {
 
   const slide = heroSlides[activeSlide];
   const action = actionSlides[activeAction];
+  useEffect(() => {
+  const heroTimer = setInterval(() => {
+    setActiveSlide((current) => (current + 1) % heroSlides.length);
+  }, 5000);
+
+  const actionTimer = setInterval(() => {
+    setActiveAction((current) => (current + 1) % actionSlides.length);
+  }, 5000);
+
+  return () => {
+    clearInterval(heroTimer);
+    clearInterval(actionTimer);
+  };
+}, []);
 
   return (
     <main className="min-h-screen bg-white">
