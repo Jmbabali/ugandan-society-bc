@@ -38,11 +38,11 @@ const heroSlides = [
 const actionSlides = [
   {
     main: "/home/team.jpg",
-    sideTop: "/home/bbq2.jpg",
-    sideBottom: "/home/dance.jpg",
+    sideTop: "/home/dance.jpg",
+    sideBottom: "/home/registration.jpg",
   },
   {
-    main: "/home/registration.jpg",
+    main: "/home/bbq2.jpg",
     sideTop: "/home/abbots.jpg",
     sideBottom: "/home/event.jpg",
   },
