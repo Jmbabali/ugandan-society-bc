@@ -51,7 +51,7 @@ export default function AboutPage() {
     {
       name: "Louis Maruk",
       role: "Vice Chairperson",
-      image: null,
+      image: "/executives/louis.bmp",
       initials: "LM",
       bio: "Supports the Chairperson in leadership, planning, and community engagement. Louis helps strengthen collaboration and supports initiatives that advance USBC’s mission.",
     },
@@ -84,11 +84,11 @@ export default function AboutPage() {
       bio: "Hilda Baliyo, BSc (Accounting), MBA is an accounting and business professional with expertise in finance, administration, and strategic management. She holds a Bachelor of Science in Accounting and an MBA from University Canada West. As an Administrator at Gallant Law Corporation in Prince George, she oversees financial and administrative operations, including trust accounting, payroll, client services, and office management. Hilda is committed to integrity, excellence, and supporting the growth and success of the Ugandan community in British Columbia.",
     },
     {
-      name: "Jackie Nakitende",
+      name: "Jackline Nakitende",
       role: "Welfare Coordinator",
-      image: null,
+      image: "/executives/jackline.bmp",
       initials: "JN",
-      bio: "Supports member well-being through welfare initiatives, community care, and member engagement programs that foster inclusion and belonging.",
+      bio: "Jackline leads initiatives that promote member well-being, compassion, and community support through welfare programs and member engagement activities. She is dedicated to fostering an inclusive, caring, and welcoming environment where every member feels valued, connected, and supported. She works to strengthen relationships within the community and promote a strong sense of belonging for all.",
     },
     {
       name: "Martin Ssemiriyo",
@@ -100,16 +100,16 @@ export default function AboutPage() {
     {
       name: "George Kagugube",
       role: "Sports & Fitness Coordinator",
-      image: null,
+      image: "/executives/gk.bmp",
       initials: "GK",
-      bio: "Promotes health, wellness, sports, recreation, teamwork, and active participation across the USBC community.",
+      bio: "George promotes health, wellness, sports, and active living while fostering teamwork, leadership, and community participation across the USBC community. As the Head Coach of the BC Cranes, George is passionate about using sport to unite, inspire, and empower individuals of all ages. He is committed to creating opportunities for recreation, personal development, and community engagement through athletics and organized sporting activities.",
     },
     {
       name: "Rogers Sserubiri",
       role: "Culture & Diversity Coordinator",
       image: "/executives/rogers.jpg",
       initials: "RS",
-      bio: "Champions cultural preservation, diversity, inclusion, and intercultural engagement while celebrating Uganda’s rich heritage.",
+      bio: "Rogers champions the preservation and promotion of Uganda's rich cultural heritage while fostering diversity, inclusion, and meaningful intercultural engagement. Rogers is dedicated to strengthening community connections, celebrating cultural identity, and creating opportunities that bring people from diverse backgrounds together through shared traditions, education, and collaboration.",
     },
   ];
 
@@ -277,13 +277,13 @@ export default function AboutPage() {
 
                 <div className="p-8">
                   <div className="mb-6 flex items-center gap-5">
-                    <div className="h-24 w-24 shrink-0 overflow-hidden rounded-3xl border bg-gray-200">
+                    <div className="h-40 w-40 shrink-0 overflow-hidden rounded-3xl border bg-gray-200">
                       {member.image ? (
                         <Image
                           src={member.image}
                           alt={member.name}
-                          width={96}
-                          height={96}
+                          width={160}
+                          height={160}
                           className="h-full w-full object-cover"
                         />
                       ) : (
