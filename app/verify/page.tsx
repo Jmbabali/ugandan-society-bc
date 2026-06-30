@@ -8,9 +8,10 @@ const supabase = createClient(
 export default async function VerifyPage({
   searchParams,
 }: {
-  searchParams: { id?: string };
+  searchParams: Promise<{ id?: string }>;
 }) {
-  const { id } = searchParams;
+  const params = await searchParams;
+  const id = params.id;
 
   if (!id) {
     return (

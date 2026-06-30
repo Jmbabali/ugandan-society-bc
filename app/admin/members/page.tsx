@@ -200,7 +200,7 @@ function startEdit(member: Member) {
 
        const cardLink = `${baseUrl}/member-card/${memberId}`;
 
-await fetch("/api/send-approval-email", {
+const emailResponse = await fetch("/api/send-approval-email", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -214,6 +214,20 @@ await fetch("/api/send-approval-email", {
     cardLink,
   }),
 });
+
+const emailResult = await emailResponse.json();
+
+if (!emailResponse.ok) {
+  setMessage(
+    `${memberId} was added successfully, but email failed: ${
+      emailResult.error || "Unknown email error"
+    }`
+  );
+  setNewMember(emptyMember);
+  setShowAddForm(false);
+  await loadMembers();
+  return;
+}
       setMessage(`${memberId} added successfully and confirmation email sent.`);
       setNewMember(emptyMember);
       setShowAddForm(false);
