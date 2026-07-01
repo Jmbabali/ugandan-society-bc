@@ -97,7 +97,16 @@ function startEdit(member: Member) {
 
   const { error } = await supabase
     .from("Members")
-    .update(editForm)
+    .update({
+      first_name: editForm.first_name,
+      last_name: editForm.last_name,
+      email: editForm.email,
+      phone: editForm.phone,
+      photo_url: editForm.photo_url,
+      membership_type: editForm.membership_type,
+      member_category: editForm.member_category,
+      status: editForm.status,
+    })
     .eq("id", editingMember.id);
 
   if (error) {
