@@ -3,6 +3,7 @@ import Link from "next/link";
 const partners = [
   { name: "Tamutamu", logo: "/partners/tamutamu.jpeg", website: "https://www.tamutamu.co",},
   { name: "Bytewave Innovations Limited", logo: "/partners/bytewave.png", website: "https://bytewaveinnovations.ca",},
+  { name: "Uganda BC Cranes Soccer Association", logo: "/partners/bccranes.webp", website: "https://ugandabccranes.ca/",},
 ];
 
 export default function PartnersPage() {
