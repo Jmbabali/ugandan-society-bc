@@ -396,7 +396,7 @@ export default function MemberDashboardPage() {
                 <p className="mt-2 text-gray-700">Send renewal payment to:</p>
 
                 <p className="mt-2 break-all text-lg font-black text-red-600">
-                  info@ugandansocietybc.ca
+                  ugandansocietybc@gmail.com
                 </p>
 
                 <p className="mt-2 text-sm text-gray-700">

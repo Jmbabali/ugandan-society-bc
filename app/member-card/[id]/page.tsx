@@ -78,9 +78,18 @@ export default function MemberCardPage() {
     );
   }
 
-  const active = member.status === "Approved" && !isExpired(member.expiry_date);
-  const verificationUrl = `${origin}/verify?id=${member.member_id}`;
-  const displayMembershipType = cleanMembershipType(member.membership_type);
+ const active = member.status === "Approved" && !isExpired(member.expiry_date);
+ const verificationUrl = `${origin}/verify?id=${member.member_id}`;
+ const displayMembershipType = cleanMembershipType(member.membership_type);
+
+const fullName = `${member.first_name} ${member.last_name}`;
+
+const nameClass =
+  fullName.length > 28
+    ? "text-xl"
+    : fullName.length > 18
+    ? "text-2xl"
+    : "text-3xl";
 
   return (
     <main className="fixed inset-0 z-[9999] overflow-auto bg-white">
@@ -162,7 +171,7 @@ export default function MemberCardPage() {
         >
           <div className="print-bg h-3 bg-gradient-to-r from-black via-yellow-400 to-red-600" />
 
-          <div className="print-bg bg-gray-950 px-6 py-5 text-white">
+          <div className="print-bg h-[230px] bg-gray-950 px-5 py-4 text-white">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white p-2">
@@ -187,16 +196,18 @@ export default function MemberCardPage() {
             </div>
 
             <p className="mt-5 text-xs font-bold uppercase tracking-widest text-gray-400">
-              Digital Membership Card
-            </p>
+  Digital Membership Card
+</p>
 
-            <h1 className="mt-2 text-3xl font-black leading-tight">
-              {member.first_name} {member.last_name}
-            </h1>
+<h1
+  className={`mt-2 h-[72px] overflow-hidden font-black leading-tight ${nameClass}`}
+>
+  {fullName}
+</h1>
 
-            <p className="mt-1 text-sm font-semibold text-yellow-400">
-              {member.member_category || "USBC Member"}
-            </p>
+<p className="mt-1 text-sm font-semibold text-yellow-400">
+  {member.member_category || "USBC Member"}
+</p>
           </div>
 
           <div className="p-5">
@@ -229,32 +240,36 @@ export default function MemberCardPage() {
               </div>
             </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className="mt-3 grid grid-cols-2 gap-3">
               <InfoBox label="Issued" value={formatDate(member.issue_date)} />
               <InfoBox label="Expires" value={formatDate(member.expiry_date)} />
               <InfoBox label="Status" value={active ? "Active" : "Inactive"} />
               <InfoBox label="Category" value={member.member_category || "Member"} />
             </div>
 
-            <div className="mt-4 rounded-xl bg-gray-100 p-3 text-center">
-              {origin && (
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${encodeURIComponent(
-                    verificationUrl
-                  )}`}
-                  alt="QR Code"
-                  className="mx-auto h-24 w-24"
-                />
-              )}
+            <div className="mt-1 border-t border-gray-200 pt-2">
+  <div className="flex flex-col items-center">
+    {origin && (
+      <img
+        src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+          verificationUrl
+        )}`}
+        alt="QR Code"
+        className="h-28 w-28"
+      />
+    )}
 
-              <p className="mt-1 text-[10px] font-bold text-gray-700">
-                Scan to Verify Membership
-              </p>
-            </div>
+    <p className="mt-1 text-[11px] font-semibold text-gray-700">
+      Scan to Verify Membership
+    </p>
+  </div>
 
-            <p className="mt-3 border-t pt-3 text-center text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400">
-              Building Connections • Preserving Heritage
-            </p>
+  <div className="mt-2 border-t border-gray-300 pt-2">
+    <p className="text-center text-[8px] font-bold uppercase tracking-[0.25em] text-gray-400">
+      Building Connections • Preserving Heritage
+    </p>
+  </div>
+</div>
           </div>
         </div>
       </div>
@@ -273,7 +288,7 @@ export default function MemberCardPage() {
 
 function InfoBox({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-gray-50 p-3">
+    <div className="rounded-2xl bg-gray-50 px-3 py-2">
       <p className="text-[10px] font-bold uppercase text-gray-500">{label}</p>
       <p className="mt-1 font-black text-gray-950">{value || "N/A"}</p>
     </div>

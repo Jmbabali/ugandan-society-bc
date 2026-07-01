@@ -60,6 +60,7 @@ const [editForm, setEditForm] = useState({
   last_name: "",
   email: "",
   phone: "",
+  photo_url: "",
   membership_type: "",
   member_category: "",
   status: "",
@@ -72,6 +73,7 @@ function startEdit(member: Member) {
     last_name: member.last_name,
     email: member.email,
     phone: member.phone,
+    photo_url: member.photo_url ?? "",
     membership_type: member.membership_type,
     member_category: member.member_category,
     status: member.status,
@@ -236,6 +238,33 @@ if (!emailResponse.ok) {
       setMessage(error.message || "Failed to add member.");
     }
   }
+
+async function uploadEditPhoto(
+  e: React.ChangeEvent<HTMLInputElement>
+) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const fileName = `${Date.now()}-${file.name}`;
+
+  const { error } = await supabase.storage
+    .from("member-photos")
+    .upload(fileName, file);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  const { data } = supabase.storage
+    .from("member-photos")
+    .getPublicUrl(fileName);
+
+  setEditForm({
+    ...editForm,
+    photo_url: data.publicUrl,
+  });
+}
 
   async function deleteMember(member: Member) {
     const confirmed = window.confirm(
@@ -769,6 +798,17 @@ async function rejectMember(member: Member) {
       />
 
       <div className="flex gap-3">
+
+      <label className="block font-semibold">
+  Member Photo
+</label>
+
+<input
+  type="file"
+  accept="image/*"
+  onChange={uploadEditPhoto}
+  className="w-full rounded-xl border p-3"
+/>
 
         <button
           onClick={saveMember}
