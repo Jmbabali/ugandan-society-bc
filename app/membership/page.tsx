@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
 import { supabase } from "@/lib/supabase";
 import MembershipHero from "@/app/components/membership/Hero";
 import MembershipBenefits from "@/app/components/membership/Benefits";
 import MembershipPlans from "@/app/components/membership/Plans";
 
+const libraries: "places"[] = ["places"];
 export default function MembershipPage() {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -18,6 +20,23 @@ export default function MembershipPage() {
     emergencyContact: "",
   });
 
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+
+const { isLoaded } = useJsApiLoader({
+  googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+  libraries,
+});
+
+function handlePlaceChanged() {
+  const place = autocompleteRef.current?.getPlace();
+
+  if (!place?.formatted_address) return;
+
+  setFormData({
+    ...formData,
+    address: place.formatted_address,
+  });
+}
   const [photo, setPhoto] = useState<File | null>(null);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -242,15 +261,36 @@ export default function MembershipPage() {
             />
           </div>
 
-          <input
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            required
-            placeholder="Full Address"
-            className="w-full rounded-xl border px-4 py-4 text-gray-950"
-          />
-
+          {isLoaded ? (
+  <Autocomplete
+    onLoad={(autocomplete) => {
+      autocompleteRef.current = autocomplete;
+    }}
+    onPlaceChanged={handlePlaceChanged}
+    options={{
+      componentRestrictions: { country: "ca" },
+      fields: ["formatted_address", "address_components", "geometry"],
+    }}
+  >
+    <input
+      name="address"
+      value={formData.address}
+      onChange={handleChange}
+      required
+      placeholder="Start typing your address"
+      className="w-full rounded-xl border px-4 py-4 text-gray-950"
+    />
+  </Autocomplete>
+) : (
+  <input
+    name="address"
+    value={formData.address}
+    onChange={handleChange}
+    required
+    placeholder="Full Address"
+    className="w-full rounded-xl border px-4 py-4 text-gray-950"
+  />
+)}
           <select
             name="membershipType"
             value={formData.membershipType}

@@ -9,6 +9,7 @@ export default function SubmitBusinessPage() {
     businessName: "",
     ownerName: "",
     category: "",
+    location: "",
     phone: "",
     email: "",
     website: "",
@@ -64,6 +65,7 @@ export default function SubmitBusinessPage() {
       business_name: formData.businessName,
       owner_name: formData.ownerName,
       category: formData.category,
+      location: formData.location,
       phone: formData.phone,
       email: formData.email,
       website: formData.website,
@@ -86,6 +88,7 @@ export default function SubmitBusinessPage() {
       businessName: "",
       ownerName: "",
       category: "",
+      location: "",
       phone: "",
       email: "",
       website: "",
@@ -179,6 +182,15 @@ export default function SubmitBusinessPage() {
               <option>Health & Wellness</option>
               <option>Other</option>
             </select>
+
+<input
+  name="location"
+  value={formData.location}
+  onChange={handleChange}
+  required
+  placeholder="Business Location / Address"
+  className="w-full rounded-xl border px-4 py-4 text-gray-950"
+/>
 
             <input
               name="phone"

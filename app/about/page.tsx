@@ -51,16 +51,16 @@ export default function AboutPage() {
     {
       name: "Louis Maruk",
       role: "Vice Chairperson",
-      image: "/executives/louis.bmp",
+      image: "/executives/maruk.bmp",
       initials: "LM",
-      bio: "Supports the Chairperson in leadership, planning, and community engagement. Louis helps strengthen collaboration and supports initiatives that advance USBC’s mission.",
+      bio: "Louis serves as the Vice President of the Ugandan Society in BC, where he is committed to strengthening the organization through collaborative leadership, strategic planning, and community engagement. He works closely with the President and Executive Committee to advance the Society's mission, foster partnerships, and support initiatives that unite and empower the Ugandan community across British Columbia. Louis is a Physician Assistant (DCM) and Biomedical Scientist (BSB), having graduated from Makerere University. He is also a competitive elite athlete, a certified road and trail running coach, a member of BC Athletics, a two-time marathon champion, a BCGEU shop steward, and a Niccola Sportswear ambassador. Passionate about service, leadership, and healthy living, Louis believes in creating meaningful opportunities that promote inclusion, wellness, and community development. He is dedicated to supporting members with integrity and compassion while inspiring others to achieve excellence both on and off the field.",
     },
         {
       name: "Babu Kigongo",
       role: "Treasurer",
       image: "/executives/kigongo.bmp",
       initials: "BK",
-      bio: "Babu serves as the Treasurer of the Ugandan Society in BC, bringing a strong commitment to faith, service, leadership, and community development. He is an entrepreneur and nonprofit leader who owns Deezee Contracting, a construction business serving clients across the Lower Mainland. Together with his wife, Danae Tracey, Babu also founded AllStars in Africa, an organization dedicated to creating lasting impact in communities in Uganda. Babu also serves with Athletes in Action, where he uses sports as a platform to mentor, disciple, and inspire athletes and coaches in faith and leadership. He believes sports have the power to transform lives, build character, and strengthen communities. Beyond his professional and community work, Babu is a devoted husband and proud father of two sons, Zeke and Zion. He enjoys music, discovering great food, and connecting with people from diverse backgrounds. In all areas of life, Babu strives to live with faith, purpose, and service.",
+      bio: "Babu Kigongo is a devoted husband to his wife, Danae Tracey, and a proud father of their two sons, Zeke and Zion. Guided by his faith and a heart for service, he is passionate about strengthening families, empowering communities, and making a lasting impact both in Canada and Uganda. As the Treasurer of the Ugandan Society in BC, Babu is committed to promoting financial stewardship, accountability, and sustainable growth. He is also an entrepreneur and owner of Deezee Contracting, serving clients throughout the Lower Mainland.Together with his wife, Babu co-founded AllStars in Africa, a nonprofit organization that transforms the lives of vulnerable children in Uganda through sports, mentorship, and leadership development. He also serves with Athletes in Action, where he mentors and disciples athletes and coaches, using sports as a platform to inspire faith, character, and leadership. Outside of his professional and community work, Babu enjoys music, exploring great food, and building meaningful relationships. He strives to live a life of integrity, purpose, and service while inspiring others to make a positive difference in their communities.",
     },
     {
       name: "John Mbabali",

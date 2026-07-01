@@ -106,6 +106,7 @@ export default function DonationsPage() {
               <option>Newcomer Support</option>
               <option>Cultural Programs</option>
               <option>Emergency Community Support</option>
+              <option>Compassionate Fund</option>
             </select>
 
             <input
