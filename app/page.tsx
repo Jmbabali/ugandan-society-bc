@@ -87,6 +87,11 @@ const partners = [
     logo: "/partners/bytewave.png",
     website: "https://bytewaveinnovations.ca",
   },
+    {
+    name: "Uganda BC Cranes Soccer Association",
+    logo: "/partners/bccranes.webp",
+    website: "https://ugandabccranes.ca/",
+  },
 ];
 
 const connectCards = [
