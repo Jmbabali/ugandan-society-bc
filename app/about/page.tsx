@@ -93,9 +93,9 @@ export default function AboutPage() {
     {
       name: "Martin Ssemiriyo",
       role: "Events Coordinator",
-      image: "/executives/martin.jpg",
+      image: "/executives/martin.bmp",
       initials: "MS",
-      bio: "Leads the planning and delivery of cultural, social, and community events that strengthen connections and celebrate Ugandan heritage.",
+      bio: "Martin serves as the Events Coordinator of the Ugandan Society in BC, where he is passionate about bringing the community together through engaging cultural celebrations, family gatherings, and community events. He is dedicated to creating memorable experiences that strengthen relationships, celebrate Uganda's rich heritage, and promote unity among members. With a background in Information Technology and Cyber Security, Martin combines his technical expertise with creativity to support event planning, digital engagement, and technology-driven solutions that enhance the Society's programs and outreach. He also works in the social services sector, reflecting his ongoing commitment to serving others and making a positive impact in the community. Outside of his professional and community roles, Martin enjoys organizing events, connecting with people, and finding innovative ways to build a stronger, more connected Ugandan community in British Columbia.",
     },
     {
       name: "George Kagugube",
