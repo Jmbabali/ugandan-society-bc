@@ -9,30 +9,12 @@ import WhyJoin from "./components/WhyJoin";
 import LatestUpdates from "./components/LatestUpdates";
 
 const heroSlides = [
-  {
-    image: "/home/compic.jpg",
-    label: "Ugandan Society in BC",
-    title: "A Stronger Ugandan Community in British Columbia",
-    text: "Connecting families, professionals, students, entrepreneurs, newcomers, and friends of Uganda through culture, service, business, and community support.",
-  },
-  {
-    image: "/home/connection.jpg",
-    label: "Community Connection",
-    title: "Building Connections Across British Columbia",
-    text: "USBC brings people together through events, networking, outreach, family support, and shared community participation.",
-  },
-  {
-    image: "/home/community-1.jpg",
-    label: "Culture & Heritage",
-    title: "Preserving Ugandan Heritage",
-    text: "We celebrate Ugandan identity through culture, traditions, food, music, language, community gatherings, and shared values.",
-  },
-  {
-    image: "/home/community-4.jpg",
-    label: "Community Growth",
-    title: "Empowering Members and Families",
-    text: "USBC supports newcomers, youth, families, professionals, entrepreneurs, and community partnerships across British Columbia.",
-  },
+  {image: "/home/image1.jpg",},
+  {image: "/home/image2.jpg",},
+  {image: "/home/image3.jpg",},
+  {image: "/home/image4.jpg",},
+  {image: "/home/image5.jpeg",}, 
+  {image: "/home/image6.jpg",},
 ];
 
 const actionSlides = [
@@ -156,89 +138,78 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-white">
-      <section className="relative min-h-[700px] overflow-hidden bg-gray-950 text-white">
-        {heroSlides.map((item, index) => (
-          <Image
-            key={item.image}
-            src={item.image}
-            alt={item.title}
-            fill
-            priority={index === 0}
-            sizes="100vw"
-            className={`object-cover transition-opacity duration-1000 ${
-              activeSlide === index ? "opacity-100 hero-zoom" : "opacity-0"
-            }`}
-          />
-        ))}
+    <section className="relative overflow-hidden bg-white">
+  <div className="relative h-[88vh] min-h-[700px] w-full overflow-hidden bg-black">
+    {heroSlides.map((item, index) => (
+      <Image
+        key={item.image}
+        src={item.image}
+        alt={item.title}
+        fill
+        priority={index === 0}
+        sizes="100vw"
+        className={`object-cover transition-opacity duration-1000 ${
+          activeSlide === index ? "opacity-100" : "opacity-0"
+        }`}
+      />
+    ))}
 
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+    <button
+      onClick={() =>
+        setActiveSlide(
+          activeSlide === 0 ? heroSlides.length - 1 : activeSlide - 1
+        )
+      }
+      className="absolute left-8 top-1/2 z-10 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-4xl font-black text-white hover:bg-white hover:text-black"
+    >
+      ‹
+    </button>
 
-        <div className="relative mx-auto flex min-h-[700px] max-w-7xl items-center px-6">
-          <div key={activeSlide} className="max-w-3xl fade-up">
-            <p className="mb-5 font-black uppercase tracking-widest text-yellow-400">
-              {slide.label}
-            </p>
+    <button
+      onClick={() => setActiveSlide((activeSlide + 1) % heroSlides.length)}
+      className="absolute right-6 top-1/2 z-10 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-4xl font-black text-white hover:bg-white hover:text-black"
+    >
+      ›
+    </button>
 
-            <h1 className="mb-8 text-5xl font-black leading-tight md:text-7xl">
-              {slide.title}
-            </h1>
+    <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-4">
+      {heroSlides.map((_, index) => (
+        <button
+          key={index}
+          onClick={() => setActiveSlide(index)}
+          className={`h-5 w-5 rounded-full border-2 border-white transition-all ${
+            activeSlide === index ? "bg-yellow-400" : "bg-transparent"
+          }`}
+        />
+      ))}
+    </div>
+  </div>
 
-            <p className="mb-10 max-w-2xl text-lg leading-8 text-gray-100 md:text-xl">
-              {slide.text}
-            </p>
+  <div className="bg-white px-6 py-8 shadow-lg">
+    <div className="mx-auto flex max-w-5xl flex-wrap justify-center gap-6">
+      <Link
+        href="/membership"
+        className="rounded-xl bg-yellow-400 px-10 py-4 font-black text-black shadow-lg hover:bg-yellow-300"
+      >
+        Become a Member
+      </Link>
 
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/membership"
-                className="rounded-xl bg-yellow-400 px-8 py-4 font-black text-black shadow-xl transition hover:bg-yellow-300"
-              >
-                Join the Community
-              </Link>
+      <Link
+        href="/donations"
+        className="rounded-xl bg-red-600 px-10 py-4 font-black text-white shadow-lg hover:bg-red-700"
+      >
+        Donate
+      </Link>
 
-              <Link
-                href="/donations"
-                className="rounded-xl bg-red-600 px-8 py-4 font-black text-white shadow-xl transition hover:bg-red-700"
-              >
-                Donate
-              </Link>
-
-              <Link
-                href="/events"
-                className="rounded-xl border border-white/40 bg-white/10 px-8 py-4 font-black text-white backdrop-blur transition hover:bg-white hover:text-black"
-              >
-                View Events
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="absolute bottom-24 right-10 hidden items-center gap-4 md:flex">
-          <button
-            onClick={() =>
-              setActiveSlide(
-                activeSlide === 0 ? heroSlides.length - 1 : activeSlide - 1
-              )
-            }
-            className="flex h-12 w-12 items-center justify-center rounded-full border border-white/40 bg-black/30 text-xl font-black text-white backdrop-blur hover:bg-white hover:text-black"
-          >
-            ‹
-          </button>
-
-          <button
-            onClick={() =>
-              setActiveSlide((activeSlide + 1) % heroSlides.length)
-            }
-            className="flex h-12 w-12 items-center justify-center rounded-full border border-white/40 bg-black/30 text-xl font-black text-white backdrop-blur hover:bg-white hover:text-black"
-          >
-            ›
-          </button>
-
-          <p className="font-black text-white">
-            {activeSlide + 1} / {heroSlides.length}
-          </p>
-        </div>
-      </section>
+      <Link
+        href="/events"
+        className="rounded-xl bg-gray-950 px-10 py-4 font-black text-white shadow-lg hover:bg-gray-800"
+      >
+        View Events
+      </Link>
+    </div>
+  </div>
+</section>
 
       <section className="relative z-10 -mt-4 px-6">
         <div className="mx-auto grid max-w-6xl overflow-hidden rounded-3xl bg-white shadow-2xl md:grid-cols-4">
