@@ -54,6 +54,7 @@ export default function AdminMembersPage() {
   const [newMember, setNewMember] = useState(emptyMember);
   const [uploading, setUploading] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
 const [editForm, setEditForm] = useState({
   first_name: "",
@@ -659,101 +660,28 @@ async function rejectMember(member: Member) {
           />
         </div>
 
-        <div className="grid gap-6">
-          {filteredMembers.map((member) => (
-            <div key={member.id} className="rounded-3xl bg-white p-6 shadow">
-              <div className="grid gap-6 lg:grid-cols-4">
-                <div>
-                  <h2 className="text-2xl font-black text-gray-950">
-                    {member.first_name} {member.last_name}
-                  </h2>
-                  <p className="text-gray-600">{member.email}</p>
-                  <p className="text-gray-600">{member.phone}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm font-bold uppercase text-gray-500">
-                    Member ID
-                  </p>
-                  <p className="font-black text-red-600">
-                    {member.member_id || "Not assigned"}
-                  </p>
-
-                  <p className="mt-3 text-sm font-bold uppercase text-gray-500">
-                    Status
-                  </p>
-                  <p className="font-black">{member.status}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm font-bold uppercase text-gray-500">
-                    Payment
-                  </p>
-                  <p className="font-black">{member.payment_status || "Unpaid"}</p>
-                  <p className="text-sm text-gray-600">
-                    ${member.payment_amount || 0}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {member.payment_method || "No method"}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-3">
-                  {member.member_id && (
-  <a
-    href={`/member-card/${member.member_id}`}
-    target="_blank"
-    className="rounded-xl bg-gray-950 px-5 py-3 text-center font-bold text-white hover:bg-gray-800"
-  >
-    View Card
-  </a>
-)}
-
-{member.status === "Pending" && (
-  <>
+        <div className="grid gap-4">
+  {filteredMembers.map((member) => (
     <button
-      onClick={() => approveMember(member)}
-      className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white hover:bg-green-700"
+      key={member.id}
+      onClick={() => setSelectedMember(member)}
+      className="rounded-2xl bg-white p-5 text-left shadow hover:bg-yellow-50"
     >
-      Approve
-    </button>
-
-    <button
-      onClick={() => rejectMember(member)}
-      className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white hover:bg-red-700"
-    >
-      Reject
-    </button>
-  </>
-)}
-
-<button
-  onClick={() => startEdit(member)}
-  className="rounded-xl bg-yellow-400 px-5 py-3 font-bold text-black hover:bg-yellow-300"
->
-  Edit
-</button>
-
-{member.payment_status === "Pending Online Payment" && (
-  <button
-    onClick={() => approveMember(member)}
-    className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white hover:bg-green-700"
-  >
-    Approve & Mark Paid
-  </button>
-)}
-
-<button
-  onClick={() => deleteMember(member)}
-  className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white hover:bg-red-700"
->
-  Delete
-</button>
-                </div>
-              </div>
-            </div>
-          ))}
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 className="text-xl font-black text-gray-950">
+            {member.first_name} {member.last_name}
+          </h2>
+          <p className="text-sm text-gray-600">{member.email}</p>
         </div>
+
+        <div className="text-sm font-bold text-gray-700">
+          {member.member_id || "No ID"} · {member.status}
+        </div>
+      </div>
+    </button>
+  ))}
+</div>
 
         {filteredMembers.length === 0 && (
           <p className="rounded-3xl bg-white p-8 text-center font-bold text-gray-600">
@@ -838,6 +766,96 @@ async function rejectMember(member: Member) {
     </div>
   </div>
 )}
+
+{selectedMember && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+    <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-8 shadow-2xl">
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-black text-gray-950">
+            {selectedMember.first_name} {selectedMember.last_name}
+          </h2>
+          <p className="text-gray-600">{selectedMember.email}</p>
+          <p className="text-gray-600">{selectedMember.phone}</p>
+        </div>
+
+        <button
+          onClick={() => setSelectedMember(null)}
+          className="rounded-xl bg-gray-200 px-4 py-2 font-bold"
+        >
+          Close
+        </button>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Info label="Member ID" value={selectedMember.member_id || "Not assigned"} />
+        <Info label="Status" value={selectedMember.status} />
+        <Info label="Payment" value={selectedMember.payment_status || "Unpaid"} />
+        <Info label="Amount" value={`$${selectedMember.payment_amount || 0}`} />
+        <Info label="Method" value={selectedMember.payment_method || "No method"} />
+        <Info label="Membership" value={selectedMember.membership_type} />
+        <Info label="Category" value={selectedMember.member_category} />
+        <Info label="Address" value={selectedMember.address} />
+      </div>
+
+      <div className="mt-8 grid gap-3">
+        {selectedMember.member_id && (
+          <a
+            href={`/member-card/${selectedMember.member_id}`}
+            target="_blank"
+            className="rounded-xl bg-gray-950 px-5 py-3 text-center font-bold text-white"
+          >
+            View Card
+          </a>
+        )}
+
+        {selectedMember.status === "Pending" && (
+          <>
+            <button
+              onClick={() => approveMember(selectedMember)}
+              className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white"
+            >
+              Approve
+            </button>
+
+            <button
+              onClick={() => rejectMember(selectedMember)}
+              className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white"
+            >
+              Reject
+            </button>
+          </>
+        )}
+
+        <button
+          onClick={() => {
+            startEdit(selectedMember);
+            setSelectedMember(null);
+          }}
+          className="rounded-xl bg-yellow-400 px-5 py-3 font-bold text-black"
+        >
+          Edit
+        </button>
+
+        <button
+          onClick={() => deleteMember(selectedMember)}
+          className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </main>
+  );
+}
+
+function Info({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-gray-100 p-4">
+      <p className="text-xs font-bold uppercase text-gray-500">{label}</p>
+      <p className="mt-1 font-black text-gray-950">{value}</p>
+    </div>
   );
 }
