@@ -55,6 +55,7 @@ export default function AdminMembersPage() {
   const [uploading, setUploading] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [approvingId, setApprovingId] = useState<number | null>(null);
 
 const [editForm, setEditForm] = useState({
   first_name: "",
@@ -290,36 +291,6 @@ async function uploadEditPhoto(
       return;
     }
 
-async function uploadPhoto(e: React.ChangeEvent<HTMLInputElement>) {
-  const file = e.target.files?.[0];
-  if (!file) return;
-
-  setUploading(true);
-
-  const fileName = `${Date.now()}-${file.name}`;
-
-  const { error } = await supabase.storage
-    .from("member-photos")
-    .upload(fileName, file);
-
-  if (error) {
-    alert(error.message);
-    setUploading(false);
-    return;
-  }
-
-  const { data } = supabase.storage
-    .from("member-photos")
-    .getPublicUrl(fileName);
-
-  setNewMember({
-    ...newMember,
-    photo_url: data.publicUrl,
-  });
-
-  setUploading(false);
-}
-
     setMessage("Member deleted.");
     await loadMembers();
   }
@@ -364,57 +335,109 @@ async function uploadPhoto(e: React.ChangeEvent<HTMLInputElement>) {
 }
 
 async function approveMember(member: Member) {
-  const memberId = await getNextMemberId();
+  if (approvingId === member.id) return;
 
-  const issueDate = new Date();
-  const expiryDate = new Date();
-  expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+  setApprovingId(member.id);
 
-  const issueDateString = formatDate(issueDate);
-  const expiryDateString = formatDate(expiryDate);
+  try {
+    if (member.member_id && member.member_id.startsWith("USBC-")) {
+      alert("This member already has a member ID.");
+      return;
+    }
+
+    const memberId = await getNextMemberId();
+
+    const issueDate = new Date();
+    const expiryDate = new Date();
+    expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
+    const issueDateString = formatDate(issueDate);
+    const expiryDateString = formatDate(expiryDate);
+
+    const baseUrl =
+      process.env.NEXT_PUBLIC_SITE_URL || "https://www.ugandansocietybc.ca";
+
+    const cardLink = `${baseUrl}/member-card/${memberId}`;
+    const qrCodeUrl = `${baseUrl}/verify?id=${memberId}`;
+
+    const { error } = await supabase
+      .from("Members")
+      .update({
+        member_id: memberId,
+        status: "Approved",
+        payment_status: "Paid",
+        payment_method: member.payment_method || "Stripe",
+        payment_date: new Date().toISOString(),
+        issue_date: issueDateString,
+        expiry_date: expiryDateString,
+        approved_by: "USBC Admin",
+        qr_code: qrCodeUrl,
+      })
+      .eq("id", member.id)
+      .or("member_id.is.null,member_id.like.PENDING-%");
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    const emailResponse = await fetch("/api/send-approval-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        toEmail: member.email,
+        memberName: `${member.first_name} ${member.last_name}`,
+        memberId,
+        issueDate: issueDateString,
+        expiryDate: expiryDateString,
+        cardLink,
+      }),
+    });
+
+    if (!emailResponse.ok) {
+      alert(`${memberId} approved, but confirmation email failed.`);
+    } else {
+      alert(`${memberId} approved and confirmation email sent.`);
+    }
+
+    await loadMembers();
+  } finally {
+    setApprovingId(null);
+  }
+}
+async function resendApprovalEmail(member: Member) {
+  if (!member.member_id) {
+    alert("This member has no Member ID yet.");
+    return;
+  }
 
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL || "https://www.ugandansocietybc.ca";
 
-  const cardLink = `${baseUrl}/member-card/${memberId}`;
-  const qrCodeUrl = `${baseUrl}/verify?id=${memberId}`;
+  const cardLink = `${baseUrl}/member-card/${member.member_id}`;
 
-  const { error } = await supabase
-    .from("Members")
-    .update({
-  member_id: memberId,
-  status: "Approved",
-  payment_status: "Paid",
-  payment_method: "Stripe",
-  payment_date: new Date().toISOString(),
-  issue_date: issueDateString,
-  expiry_date: expiryDateString,
-  approved_by: "USBC Admin",
-  qr_code: qrCodeUrl,
-})
-    .eq("id", member.id);
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  await fetch("/api/send-approval-email", {
+  const response = await fetch("/api/send-approval-email", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       toEmail: member.email,
       memberName: `${member.first_name} ${member.last_name}`,
-      memberId,
-      issueDate: issueDateString,
-      expiryDate: expiryDateString,
+      memberId: member.member_id,
+      issueDate: member.issue_date || "",
+      expiryDate: member.expiry_date || "",
       cardLink,
     }),
   });
 
-  await loadMembers();
-}
+  if (!response.ok) {
+    alert("Approval email failed to resend.");
+    return;
+  }
 
+  alert(`Approval email resent to ${member.email}`);
+}
 async function rejectMember(member: Member) {
   const confirmed = confirm(
     `Reject ${member.first_name} ${member.last_name}?`
@@ -809,21 +832,24 @@ async function rejectMember(member: Member) {
           </a>
         )}
 
+        {selectedMember.member_id && (
+  <button
+    onClick={() => resendApprovalEmail(selectedMember)}
+    className="rounded-xl bg-blue-600 px-5 py-3 font-bold text-white"
+  >
+    Resend Approval Email
+  </button>
+)}
+
         {selectedMember.status === "Pending" && (
           <>
             <button
-              onClick={() => approveMember(selectedMember)}
-              className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white"
-            >
-              Approve
-            </button>
-
-            <button
-              onClick={() => rejectMember(selectedMember)}
-              className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white"
-            >
-              Reject
-            </button>
+  disabled={approvingId === selectedMember.id}
+  onClick={() => approveMember(selectedMember)}
+  className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white disabled:opacity-50"
+>
+  {approvingId === selectedMember.id ? "Approving..." : "Approve"}
+</button>
           </>
         )}
 
