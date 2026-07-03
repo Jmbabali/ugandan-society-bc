@@ -144,7 +144,7 @@ export default function HomePage() {
       <Image
         key={item.image}
         src={item.image}
-        alt={item.title}
+        alt="USBC community slideshow"
         fill
         priority={index === 0}
         sizes="100vw"
@@ -398,7 +398,7 @@ export default function HomePage() {
                 <div className="relative h-44">
                   <Image
                     src={item.image}
-                    alt={item.title}
+                    alt="USBC community slideshow"
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover transition duration-500 group-hover:scale-105"
