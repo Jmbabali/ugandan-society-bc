@@ -1,9 +1,7 @@
 "use client";
 
-import bcrypt from "bcryptjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
 
 export default function ChangePasswordPage() {
   const router = useRouter();
@@ -37,20 +35,23 @@ export default function ChangePasswordPage() {
     setSaving(true);
     setMessage("Saving password...");
 
-    const password_hash = await bcrypt.hash(password, 10);
+    const response = await fetch("/api/admin/change-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        newPassword: password,
+      }),
+    });
 
-    const { error } = await supabase
-      .from("Admins")
-      .update({
-        password_hash,
-        force_password_change: false,
-      })
-      .eq("email", email);
+    const result = await response.json();
 
     setSaving(false);
 
-    if (error) {
-      setMessage(error.message);
+    if (!response.ok) {
+      setMessage(result.error || "Unable to change password.");
       return;
     }
 
@@ -61,19 +62,19 @@ export default function ChangePasswordPage() {
   return (
     <main className="min-h-screen bg-gray-100 px-6 py-20">
       <div className="mx-auto max-w-md rounded-3xl bg-white p-8 shadow-xl">
-       <p className="mb-2 text-center font-bold uppercase tracking-[0.35em] text-red-600">
-  Ugandan Society in BC
-</p>
+        <p className="mb-2 text-center font-bold uppercase tracking-[0.35em] text-red-600">
+          Ugandan Society in BC
+        </p>
 
-<h1 className="mb-4 text-center text-4xl font-black text-gray-950">
-  Welcome to the Executive Portal
-</h1>
+        <h1 className="mb-4 text-center text-4xl font-black text-gray-950">
+          Welcome to the Executive Portal
+        </h1>
 
-<p className="mb-8 text-center leading-7 text-gray-600">
-  This is your first login.
-  <br />
-  For your security, please create a personal password before continuing.
-</p>
+        <p className="mb-8 text-center leading-7 text-gray-600">
+          This is your first login.
+          <br />
+          For your security, please create a personal password before continuing.
+        </p>
 
         <form onSubmit={handleChangePassword} className="space-y-5">
           <input
