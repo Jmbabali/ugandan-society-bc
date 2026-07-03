@@ -769,11 +769,26 @@ async function rejectMember(member: Member) {
   onChange={uploadEditPhoto}
   className="w-full rounded-xl border p-3"
 />
+<select
+  value={editForm.member_category}
+  onChange={(e) =>
+    setEditForm({ ...editForm, member_category: e.target.value })
+  }
+  className="w-full border rounded-xl p-3"
+>
+  <option>General Member</option>
+  <option>Executive Committee</option>
+  <option>Board of Trustees</option>
+  <option>Honorary Member</option>
+  <option>Corporate Partner</option>
+  <option>Student Member</option>
+</select>
 
         <button
           onClick={saveMember}
           className="flex-1 bg-green-600 text-white rounded-xl py-3 font-bold"
         >
+          
           Save
         </button>
 
