@@ -57,6 +57,25 @@ export async function POST(request: Request) {
       if (donationError) {
         console.error("Donation update error:", donationError);
       }
+
+      const businessId = session.metadata?.business_id;
+const paymentType = session.metadata?.payment_type;
+
+if (businessId && paymentType === "business_hub") {
+  const { error: businessError } = await supabaseAdmin
+    .from("Businesses")
+    .update({
+      payment_status: "Paid",
+      payment_method: "Stripe",
+      payment_date: new Date().toISOString(),
+      stripe_session_id: session.id,
+    })
+    .eq("business_id", businessId);
+
+  if (businessError) {
+    console.error("Business payment update error:", businessError);
+  }
+}
     }
 
     return NextResponse.json({ received: true });
