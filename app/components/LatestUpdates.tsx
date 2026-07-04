@@ -12,6 +12,11 @@ type Update = {
   status: string;
 };
 
+function shortText(text: string, maxLength = 200) {
+  if (!text) return "";
+  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+}
+
 export default function LatestUpdates() {
   const [updates, setUpdates] = useState<Update[]>([]);
 
@@ -81,12 +86,10 @@ export default function LatestUpdates() {
               </h3>
 
               <p className="mb-6 leading-7 text-gray-600">
-                {update.message}
+                {shortText(update.message, 200)}
               </p>
 
-              <span className="font-black text-red-600">
-                Read More →
-              </span>
+              <span className="font-black text-red-600">Read More →</span>
             </Link>
           ))}
         </div>
