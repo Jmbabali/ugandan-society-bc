@@ -1,11 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
+type Business = {
+  id?: number;
+  business_id: string;
+  business_name: string;
+  owner_name?: string | null;
+  category: string | null;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
+  logo_url: string | null;
+  description: string | null;
+  location?: string | null;
+  status: string;
+};
+
 export default function BusinessHubPage() {
-  const [businesses, setBusinesses] = useState<any[]>([]);
+  const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("All");
 
   useEffect(() => {
     fetchBusinesses();
@@ -18,15 +35,27 @@ export default function BusinessHubPage() {
       .eq("status", "Approved")
       .order("business_name", { ascending: true });
 
-    if (!error && data) {
-      setBusinesses(data);
-    }
+    if (!error && data) setBusinesses(data);
   }
 
-  function getWebsiteUrl(website: string) {
-    if (!website) return "";
-    return website.startsWith("http") ? website : `https://${website}`;
-  }
+  const categories = useMemo(() => {
+    const unique = businesses
+      .map((b) => b.category)
+      .filter(Boolean) as string[];
+
+    return ["All", ...Array.from(new Set(unique))];
+  }, [businesses]);
+
+  const filteredBusinesses = businesses.filter((business) => {
+    const text = `${business.business_name || ""} ${business.category || ""} ${
+      business.location || ""
+    } ${business.description || ""}`.toLowerCase();
+
+    return (
+      text.includes(search.toLowerCase()) &&
+      (category === "All" || business.category === category)
+    );
+  });
 
   return (
     <main className="min-h-screen bg-gray-100">
@@ -36,110 +65,121 @@ export default function BusinessHubPage() {
             Business Hub
           </p>
 
-          <h1 className="mb-6 text-4xl font-black md:text-6xl">
-            Ugandan Businesses in BC
+          <h1 className="mb-6 text-5xl font-black">
+            Ugandan Business Directory
           </h1>
 
           <p className="max-w-3xl text-lg text-gray-300">
-            Discover approved Ugandan-owned businesses, professionals,
-            entrepreneurs, and community partners across British Columbia.
+            Discover Ugandan-owned businesses, entrepreneurs and professionals
+            serving communities across British Columbia.
           </p>
 
-          <div className="mt-8">
+          <div className="mt-10 flex flex-col gap-4 md:flex-row">
+            <input
+              type="text"
+              placeholder="Search businesses..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1 rounded-xl border border-gray-700 bg-gray-900 px-5 py-4 text-white"
+            />
+
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="rounded-xl bg-gray-900 px-5 py-4 text-white"
+            >
+              {categories.map((item) => (
+                <option key={item}>{item}</option>
+              ))}
+            </select>
+
             <Link
               href="/business-hub/submit"
-              className="inline-block rounded-xl bg-yellow-400 px-8 py-4 font-bold text-black hover:bg-yellow-300"
+              className="rounded-xl bg-yellow-400 px-8 py-4 text-center font-bold text-black hover:bg-yellow-300"
             >
-              Submit Your Business
+              + Register Business
             </Link>
           </div>
         </div>
       </section>
 
-      <section className="px-6 pb-20 pt-20">
+      <section className="px-6 py-16">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-10">
-            <p className="mb-4 font-bold uppercase tracking-widest text-red-600">
-              Approved Directory
-            </p>
-
-            <h2 className="text-3xl font-black text-gray-950 md:text-5xl">
-              Business Listings
+          <div className="mb-8">
+            <h2 className="text-4xl font-black text-gray-950">
+              Business Directory
             </h2>
+
+            <p className="mt-2 text-gray-600">
+              {filteredBusinesses.length} approved businesses
+            </p>
           </div>
 
-          {businesses.length === 0 ? (
-            <div className="rounded-3xl border bg-white p-8 shadow-premium">
-              <h3 className="mb-3 text-2xl font-black text-gray-950">
-                No approved businesses yet
+          {filteredBusinesses.length === 0 ? (
+            <div className="rounded-3xl bg-white p-10 text-center shadow">
+              <h3 className="text-2xl font-black text-gray-950">
+                No businesses found
               </h3>
 
-              <p className="text-gray-700">
-                Approved businesses will appear here after review by the USBC
-                executive team.
+              <p className="mt-3 text-gray-600">
+                Try another search or category.
               </p>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {businesses.map((business) => (
+            <div className="space-y-5">
+              {filteredBusinesses.map((business) => (
                 <div
                   key={business.business_id}
-                  className="rounded-3xl border border-gray-100 bg-white p-6 shadow-premium"
+                  className="rounded-3xl bg-white p-6 shadow transition hover:shadow-xl"
                 >
-                  <div className="mb-5 flex h-24 w-24 items-center justify-center rounded-2xl border bg-gray-50 p-2">
-                    {business.logo_url ? (
-                      <img
-                        src={business.logo_url}
-                        alt={`${business.business_name} logo`}
-                        className="h-full w-full rounded-xl object-contain"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-center text-xs font-bold text-gray-500">
-                        No Logo
+                  <div className="flex flex-col gap-6 md:flex-row md:items-center">
+                    <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl border bg-gray-50">
+                      {business.logo_url ? (
+                        <img
+                          src={business.logo_url}
+                          alt={business.business_name}
+                          className="h-full w-full object-contain"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-sm text-gray-500">
+                          Logo
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1">
+                      <h3 className="text-2xl font-black text-gray-950">
+                        {business.business_name}
+                      </h3>
+
+                      <div className="mt-2 flex flex-wrap gap-3">
+                        {business.category && (
+                          <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-bold text-yellow-800">
+                            {business.category}
+                          </span>
+                        )}
+
+                        {business.location && (
+                          <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
+                            📍 {business.location}
+                          </span>
+                        )}
                       </div>
-                    )}
-                  </div>
 
-                  <h3 className="text-2xl font-black text-gray-950">
-                    {business.business_name}
-                  </h3>
-
-                  <p className="mt-2 font-bold text-yellow-600">
-                    {business.category}
-                  </p>
-
-                  <p className="mt-4 text-gray-600">
-                    {business.description}
-                  </p>
-
-                  <div className="mt-6 space-y-3 text-gray-700">
-                    {business.website && (
-                      <p>
-                        🌐{" "}
-                        <a
-                          href={getWebsiteUrl(business.website)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-bold text-blue-600 hover:underline"
-                        >
-                          Website
-                        </a>
+                      <p className="mt-4 text-gray-600">
+                        {business.description &&
+                        business.description.length > 180
+                          ? business.description.substring(0, 180) + "..."
+                          : business.description || "No description provided."}
                       </p>
-                    )}
+                    </div>
 
-                    {business.email && (
-                      <p>
-                        📧{" "}
-                        <a
-                          href={`mailto:${business.email}`}
-                          className="hover:text-gray-950"
-                        >
-                          {business.email}
-                        </a>
-                      </p>
-                    )}
-
-                    {business.phone && <p>📞 {business.phone}</p>}
+                    <Link
+                      href={`/business-hub/${business.business_id}`}
+                      className="rounded-xl bg-gray-950 px-7 py-4 text-center font-bold text-white hover:bg-black"
+                    >
+                      View Profile →
+                    </Link>
                   </div>
                 </div>
               ))}
