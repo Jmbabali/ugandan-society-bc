@@ -33,6 +33,8 @@ export default function AdminDashboardPage() {
     totalEvents: 0,
     totalBusinesses: 0,
     pendingBusinesses: 0,
+    paidBusinesses: 0,
+    businessRevenue: 0,
     totalDonations: 0,
     donationsAmount: 0,
   });
@@ -68,13 +70,9 @@ export default function AdminDashboardPage() {
     const businessRows = businesses || [];
     const donationRows = donations || [];
 
-    const paidMembers = memberRows.filter(
-      (m) => m.payment_status === "Paid"
-    );
-
-    const paidDonations = donationRows.filter(
-      (d) => d.payment_status === "Paid"
-    );
+    const paidMembers = memberRows.filter((m) => m.payment_status === "Paid");
+    const paidDonations = donationRows.filter((d) => d.payment_status === "Paid");
+    const paidBusinesses = businessRows.filter((b) => b.payment_status === "Paid");
 
     const revenue = paidMembers.reduce(
       (sum, m) => sum + Number(m.payment_amount || 0),
@@ -86,6 +84,11 @@ export default function AdminDashboardPage() {
       0
     );
 
+    const businessRevenue = paidBusinesses.reduce(
+      (sum, b) => sum + Number(b.payment_amount || 0),
+      0
+    );
+
     setStats({
       totalMembers: memberRows.length,
       approvedMembers: memberRows.filter((m) => m.status === "Approved").length,
@@ -94,13 +97,13 @@ export default function AdminDashboardPage() {
         (m) => m.expiry_date && new Date(m.expiry_date) < today
       ).length,
       paidMembers: paidMembers.length,
-      unpaidMembers: memberRows.filter((m) => m.payment_status !== "Paid")
-        .length,
+      unpaidMembers: memberRows.filter((m) => m.payment_status !== "Paid").length,
       revenue,
       totalEvents: eventRows.length,
       totalBusinesses: businessRows.length,
-      pendingBusinesses: businessRows.filter((b) => b.status === "Pending")
-        .length,
+      pendingBusinesses: businessRows.filter((b) => b.status === "Pending").length,
+      paidBusinesses: paidBusinesses.length,
+      businessRevenue,
       totalDonations: paidDonations.length,
       donationsAmount,
     });
@@ -191,9 +194,12 @@ export default function AdminDashboardPage() {
           <StatCard icon={<AlertTriangle />} title="Pending Approvals" value={stats.pendingMembers} note="Members waiting review" color="yellow" />
           <StatCard icon={<DollarSign />} title="Membership Revenue" value={`$${stats.revenue.toFixed(2)}`} note={`${stats.paidMembers} paid members only`} color="green" />
           <StatCard icon={<AlertTriangle />} title="Expired Members" value={stats.expiredMembers} note="Require renewal follow-up" color="red" />
+
           <StatCard icon={<CalendarDays />} title="Events" value={stats.totalEvents} note="Total events created" color="blue" />
           <StatCard icon={<BriefcaseBusiness />} title="Businesses" value={stats.totalBusinesses} note={`${stats.pendingBusinesses} pending approval`} color="purple" />
+          <StatCard icon={<DollarSign />} title="Business Hub Revenue" value={`$${stats.businessRevenue.toFixed(2)}`} note={`${stats.paidBusinesses} paid businesses`} color="green" />
           <StatCard icon={<Gift />} title="Paid Donations" value={`$${stats.donationsAmount.toFixed(2)}`} note={`${stats.totalDonations} completed donations`} color="green" />
+
           <StatCard icon={<DollarSign />} title="Unpaid Members" value={stats.unpaidMembers} note="Payment not completed" color="red" />
         </section>
 
@@ -228,7 +234,7 @@ export default function AdminDashboardPage() {
                   key={business.id}
                   title={business.business_name || "Unnamed business"}
                   line1={business.category || "No category"}
-                  line2={business.status || "No status"}
+                  line2={`${business.status || "No status"} • ${business.payment_status || "No payment"}`}
                 />
               ))
             )}
