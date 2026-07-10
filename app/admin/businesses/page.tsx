@@ -29,6 +29,7 @@ export default function AdminBusinessesPage() {
   const [form, setForm] = useState<Business>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
 
   useEffect(() => {
     fetchBusinesses();
@@ -49,14 +50,61 @@ export default function AdminBusinessesPage() {
       return;
     }
 
+let logoUrl = "";
+
+if (logoFile) {
+  const fileExt = logoFile.name.split(".").pop() || "png";
+  const fileName = `BUS-${Date.now()}.${fileExt}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("business-logos")
+    .upload(fileName, logoFile, {
+      cacheControl: "3600",
+      upsert: true,
+    });
+
+  if (uploadError) {
+    alert(uploadError.message);
+    return;
+  }
+
+  const { data } = supabase.storage
+    .from("business-logos")
+    .getPublicUrl(fileName);
+
+  logoUrl = data.publicUrl;
+}
+
     if (editingId) {
-      await supabase
-        .from("Businesses")
-        .update(form)
-        .eq("id", editingId);
-    } else {
-      await supabase.from("Businesses").insert([form]);
-    }
+  const updateData = {
+    ...form,
+    ...(logoUrl ? { logo_url: logoUrl } : {}),
+  };
+
+  const { error } = await supabase
+    .from("Businesses")
+    .update(updateData)
+    .eq("id", editingId);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+} else {
+  const insertData = {
+    ...form,
+    logo_url: logoUrl,
+  };
+
+  const { error } = await supabase
+    .from("Businesses")
+    .insert([insertData]);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+}
 
     setForm(emptyForm);
     setEditingId(null);
@@ -193,6 +241,22 @@ export default function AdminBusinessesPage() {
                 placeholder="Phone"
                 className="rounded-xl border px-4 py-3"
               />
+<div>
+  <label className="mb-2 block text-sm font-bold uppercase text-gray-500">
+    Business Logo
+  </label>
+
+  <input
+    type="file"
+    accept="image/*"
+    onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+    className="w-full rounded-xl border bg-white px-4 py-4 text-gray-950"
+  />
+
+  <p className="mt-2 text-sm text-gray-500">
+    Upload the business logo (optional).
+  </p>
+</div>
 
               <textarea
                 value={form.description}
