@@ -33,7 +33,6 @@ president: [
   "gallery",
   "updates",
   "donations",
-  "reports",
   "payments",
 ],
 
@@ -48,7 +47,6 @@ vice_president: [
   "gallery",
   "updates",
   "donations",
-  "reports",
   "payments",
 ],
   pro: [
@@ -60,23 +58,21 @@ vice_president: [
   "businesses",
   "gallery",
   "updates",
-  "reports",
 ],
 
-  secretary: ["dashboard", "members", "reports", "renewals"],
+  secretary: ["dashboard", "members", "renewals"],
 
   treasurer: [
     "dashboard",
     "payments",
     "members",
     "renewals",
-    "reports",
     "donations",
   ],
 
   events: ["dashboard", "events", "event_registrations"],
 
-  fundraising: ["dashboard", "donations", "reports"],
+  fundraising: ["dashboard", "donations"],
 };
 
 export function getAdminRole(): AdminRole {
