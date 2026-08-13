@@ -93,6 +93,7 @@ if (logoFile) {
 } else {
   const insertData = {
     ...form,
+    business_id: `BUS-${Date.now()}`,
     logo_url: logoUrl,
   };
 

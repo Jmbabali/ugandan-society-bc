@@ -5,7 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 type Business = {
-  id?: number;
+  id: string;
   business_id: string;
   business_name: string;
   owner_name?: string | null;
@@ -25,18 +25,18 @@ export default function BusinessHubPage() {
   const [category, setCategory] = useState("All");
 
   useEffect(() => {
-    fetchBusinesses();
+    async function fetchBusinesses() {
+      const { data, error } = await supabase
+        .from("Businesses")
+        .select("*")
+        .eq("status", "Approved")
+        .order("business_name", { ascending: true });
+
+      if (!error && data) setBusinesses(data);
+    }
+
+    void fetchBusinesses();
   }, []);
-
-  async function fetchBusinesses() {
-    const { data, error } = await supabase
-      .from("Businesses")
-      .select("*")
-      .eq("status", "Approved")
-      .order("business_name", { ascending: true });
-
-    if (!error && data) setBusinesses(data);
-  }
 
   const categories = useMemo(() => {
     const unique = businesses
@@ -129,7 +129,7 @@ export default function BusinessHubPage() {
             <div className="space-y-5">
               {filteredBusinesses.map((business) => (
                 <div
-                  key={business.business_id}
+                  key={business.id}
                   className="rounded-3xl bg-white p-6 shadow transition hover:shadow-xl"
                 >
                   <div className="flex flex-col gap-6 md:flex-row md:items-center">
@@ -175,7 +175,7 @@ export default function BusinessHubPage() {
                     </div>
 
                     <Link
-                      href={`/business-hub/${business.business_id}`}
+                      href={`/business-hub/${business.id}`}
                       className="rounded-xl bg-gray-950 px-7 py-4 text-center font-bold text-white hover:bg-black"
                     >
                       View Profile →
