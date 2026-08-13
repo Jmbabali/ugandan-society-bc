@@ -1,5 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
+import LeadershipGrid, {
+  type LeadershipProfile,
+} from "../components/LeadershipGrid";
 
 export default function AboutPage() {
   const values = [
@@ -40,7 +42,45 @@ export default function AboutPage() {
     },
   ];
 
-  const executiveTeam = [
+  const boardOfTrustees: LeadershipProfile[] = [
+    {
+      name: "Hanifa Nabuuma",
+      role: "Chairperson",
+      image: "/trustees/hanifa-nabuuma.webp",
+      initials: "HN",
+      bio: "Hanifa Nabuuma is a cybersecurity and technology leader specializing in identity and access management, cloud security, artificial intelligence security, and application security. As Chairperson of the Board of Trustees of the Ugandan Society in British Columbia, she supports strong governance and strategic oversight while helping the Society create meaningful opportunities for Ugandans throughout the province.\n\nBeyond her professional work, Hanifa is passionate about leadership, mentorship, youth development, volunteerism, and community building. She believes vibrant communities are strengthened through collaboration, shared responsibility, and a commitment to supporting one another while celebrating and preserving cultural heritage.",
+    },
+    {
+      name: "Irene Nviiri",
+      role: "Secretary",
+      image: "/trustees/irene-nviiri.webp",
+      initials: "IN",
+      bio: "Irene Nviiri is a transformational coach, public speaker, cultural ambassador, and community leader committed to empowering individuals and strengthening communities through connection, inclusion, and cultural pride. As Founder and CEO of Emerge & Soar Consultancy Inc., she supports immigrant women and newcomers in developing the clarity, confidence, and sense of purpose needed to thrive.\n\nAs Secretary of the Board of Trustees of the Ugandan Society in British Columbia, Irene contributes her leadership and community-engagement experience to support effective governance and meaningful community connections. She also serves as Chairperson of FV Community Integration Services Society.\n\nPassionate about preserving and celebrating Ugandan heritage, Irene uses storytelling, dance, and community engagement to promote cultural pride, foster belonging, and build inclusive communities.",
+    },
+    {
+      name: "Reuben Mulinde",
+      role: "Member-at-Large",
+      image: "/trustees/reuben-mulinde.webp",
+      initials: "RM",
+      bio: "Reuben Mulinde is an educator, technology professional, and community advocate committed to service, education, and social justice. He holds a Bachelor of Education from Makerere University and brings professional experience in teaching, mentorship, information technology, digital media, and organizational leadership.\n\nWith a strong passion for community development, Reuben uses education and technology to empower individuals, encourage meaningful participation, and strengthen inclusive communities. As a Member-at-Large on the Board of Trustees of the Ugandan Society in British Columbia, he contributes dedication, integrity, and a collaborative spirit to the Society’s governance and community-building efforts.",
+    },
+    {
+      name: "Olivia Mbabazi",
+      role: "Board Member",
+      image: "/trustees/olivia-mbabazi.webp",
+      initials: "OM",
+      bio: "Olivia Mbabazi is a proud Ugandan-Canadian community leader, entrepreneur, and advocate for cultural connection based in Surrey, British Columbia. She is the Founder of Sherabo Organics Inc., a Canadian organic skincare company inspired by her Ugandan heritage and commitment to clean, natural beauty.\n\nWith extensive experience in event management, administration, and procurement, Olivia brings strong leadership, organizational, and problem-solving skills to her community work. She is passionate about mentorship, community building, and creating inclusive spaces where individuals feel supported and empowered. As a member of the Board of Trustees of the Ugandan Society in British Columbia, Olivia serves with resilience, empathy, and a genuine commitment to strengthening and supporting the community.",
+    },
+    {
+      name: "Brian Seremba",
+      role: "Board Member",
+      image: "/trustees/brian-seremba.webp",
+      initials: "BS",
+      bio: "Brian Seremba is an award-winning social and economic impact leader, product strategist, and ecosystem builder working at the intersection of equity, entrepreneurship, culture, and innovation. He received the King Charles III Coronation Medal in recognition of his contributions to social justice, community development, and systemic equity across British Columbia.\n\nAs Co-Founder of the BC Community Alliance, Brian has helped lead major initiatives including the Safe School Hub, BC Racism Tracker, Supports for Student Learning Program, Community Venture Hub, and Fraser Street Studios and Spaces. Through these initiatives, the organization has supported more than 148 Black youth with mentorship, mental-health resources, financial literacy, leadership development, and advocacy tools, while engaging over 400 young people in shaping anti-racism policy.\n\nBrian’s leadership has supported advocacy related to British Columbia’s Anti-Racism Data Act and Anti-Racism Act, while contributing to more than 30 partnerships with organizations and funders including the NBA Foundation, RBC Future Launch, and the Foundation for Black Communities. He has also led public campaigns supporting missing and murdered Black youth and their families, helping generate millions of impressions and raise more than $250,000 toward long-term community impact.\n\nBrian is also the Founder of Mutima Canada and Tropicraze, advancing community-centred economic development, ethical supply chains, and culturally inspired entrepreneurship. He serves as the Pacific Region Representative for the Uganda North American Association and as a member of the Board of Trustees of the Ugandan Society in British Columbia. Brian holds a degree in Management with International Business from Royal Holloway, University of London, and brings a systems-thinking approach grounded in cultural pride, grassroots mobilization, and economic strategy.",
+    },
+  ];
+
+  const executiveTeam: LeadershipProfile[] = [
     {
       name: "Abbey Nsubuga Kizito",
       role: "Chairperson",
@@ -179,6 +219,31 @@ export default function AboutPage() {
 
       <section className="bg-white px-6 py-20">
         <div className="mx-auto max-w-7xl">
+          <div className="mb-12 max-w-4xl">
+            <p className="mb-4 font-black uppercase tracking-widest text-red-600">
+              Board of Trustees
+            </p>
+
+            <h2 className="mb-4 text-3xl font-black text-gray-950 md:text-5xl">
+              Governance and Strategic Oversight
+            </h2>
+
+            <p className="text-lg leading-8 text-gray-700">
+              The Board of Trustees supports strong governance, accountability,
+              and the long-term direction of the Ugandan Society in British
+              Columbia. Select a photograph to read each trustee&apos;s biography.
+            </p>
+          </div>
+
+          <LeadershipGrid
+            members={boardOfTrustees}
+            groupLabel="Board of Trustees"
+          />
+        </div>
+      </section>
+
+      <section className="px-6 py-20">
+        <div className="mx-auto max-w-7xl">
           <div className="mb-12 max-w-3xl">
             <p className="mb-4 font-black uppercase tracking-widest text-red-600">
               Our Values
@@ -263,56 +328,15 @@ export default function AboutPage() {
 
             <p className="text-lg leading-8 text-gray-700">
               USBC is led by community leaders committed to service,
-              accountability, transparency, and community development.
+              accountability, transparency, and community development. Select a
+              photograph to read each executive&apos;s biography.
             </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-            {executiveTeam.map((member) => (
-              <div
-                key={member.name}
-                className="overflow-hidden rounded-3xl border bg-gray-50 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="h-2 bg-gradient-to-r from-black via-yellow-400 to-red-600" />
-
-                <div className="p-8">
-                  <div className="mb-6 flex items-center gap-5">
-                    <div className="h-40 w-40 shrink-0 overflow-hidden rounded-3xl border bg-gray-200">
-                      {member.image ? (
-                        <Image
-                          src={member.image}
-                          alt={member.name}
-                          width={160}
-                          height={160}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-gray-950 text-2xl font-black text-yellow-400">
-                          {member.initials}
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <h3 className="text-xl font-black text-gray-950">
-                        {member.name}
-                      </h3>
-
-                      <p className="mt-1 text-sm font-black uppercase tracking-wide text-red-600">
-                        {member.role}
-                      </p>
-                    </div>
-                  </div>
-
-                  <p className="leading-7 text-gray-700">{member.bio}</p>
-
-                  <div className="mt-6 border-t pt-4 text-sm font-bold text-gray-500">
-                    Executive Committee
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <LeadershipGrid
+            members={executiveTeam}
+            groupLabel="Executive Committee"
+          />
         </div>
       </section>
 
