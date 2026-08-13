@@ -219,31 +219,6 @@ export default function AboutPage() {
 
       <section className="bg-white px-6 py-20">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-12 max-w-4xl">
-            <p className="mb-4 font-black uppercase tracking-widest text-red-600">
-              Board of Trustees
-            </p>
-
-            <h2 className="mb-4 text-3xl font-black text-gray-950 md:text-5xl">
-              Governance and Strategic Oversight
-            </h2>
-
-            <p className="text-lg leading-8 text-gray-700">
-              The Board of Trustees supports strong governance, accountability,
-              and the long-term direction of the Ugandan Society in British
-              Columbia. Select a photograph to read each trustee&apos;s biography.
-            </p>
-          </div>
-
-          <LeadershipGrid
-            members={boardOfTrustees}
-            groupLabel="Board of Trustees"
-          />
-        </div>
-      </section>
-
-      <section className="px-6 py-20">
-        <div className="mx-auto max-w-7xl">
           <div className="mb-12 max-w-3xl">
             <p className="mb-4 font-black uppercase tracking-widest text-red-600">
               Our Values
@@ -319,6 +294,31 @@ export default function AboutPage() {
         <div className="mx-auto max-w-7xl">
           <div className="mb-12 max-w-4xl">
             <p className="mb-4 font-black uppercase tracking-widest text-red-600">
+              Board of Trustees
+            </p>
+
+            <h2 className="mb-4 text-3xl font-black text-gray-950 md:text-5xl">
+              Governance and Strategic Oversight
+            </h2>
+
+            <p className="text-lg leading-8 text-gray-700">
+              The Board of Trustees supports strong governance, accountability,
+              and the long-term direction of the Ugandan Society in British
+              Columbia. Select a photograph to read each trustee&apos;s biography.
+            </p>
+          </div>
+
+          <LeadershipGrid
+            members={boardOfTrustees}
+            groupLabel="Board of Trustees"
+          />
+        </div>
+      </section>
+
+      <section className="px-6 py-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12 max-w-4xl">
+            <p className="mb-4 font-black uppercase tracking-widest text-red-600">
               Executive Committee
             </p>
 
@@ -340,7 +340,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="px-6 py-20">
+      <section className="bg-white px-6 py-20">
         <div className="mx-auto max-w-7xl">
           <div className="mb-12 max-w-3xl">
             <p className="mb-4 font-black uppercase tracking-widest text-red-600">
