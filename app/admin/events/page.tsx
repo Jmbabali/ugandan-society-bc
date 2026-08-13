@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -27,6 +28,26 @@ type EventRegistration = {
   status: string;
 };
 
+type EventForm = {
+  title: string;
+  description: string;
+  location: string;
+  event_date: string;
+  event_time: string;
+  registration_deadline: string;
+  status: string;
+};
+
+const emptyEventForm: EventForm = {
+  title: "",
+  description: "",
+  location: "",
+  event_date: "",
+  event_time: "",
+  registration_deadline: "",
+  status: "Open",
+};
+
 export default function AdminEventsPage() {
   const router = useRouter();
 
@@ -35,28 +56,48 @@ export default function AdminEventsPage() {
   const [message, setMessage] = useState("");
   const [checkingLogin, setCheckingLogin] = useState(true);
   const [posterFile, setPosterFile] = useState<File | null>(null);
-
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    location: "",
-    event_date: "",
-    event_time: "",
-    registration_deadline: "",
-    status: "Open",
-  });
+  const [form, setForm] = useState<EventForm>(emptyEventForm);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [editForm, setEditForm] = useState<EventForm>(emptyEventForm);
+  const [editPosterFile, setEditPosterFile] = useState<File | null>(null);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("usbc_admin_logged_in");
+    async function loadInitialData() {
+      const isLoggedIn = localStorage.getItem("usbc_admin_logged_in");
 
-    if (isLoggedIn !== "true") {
-      router.push("/admin/login");
-      return;
+      if (isLoggedIn !== "true") {
+        router.replace("/admin/login");
+        return;
+      }
+
+      const [eventResult, registrationResult] = await Promise.all([
+        supabase
+          .from("Events")
+          .select("*")
+          .order("event_date", { ascending: true }),
+        supabase
+          .from("EventRegistrations")
+          .select("*")
+          .order("registration_date", { ascending: false }),
+      ]);
+
+      if (eventResult.error) {
+        setMessage(eventResult.error.message);
+      } else {
+        setEvents(eventResult.data || []);
+      }
+
+      if (registrationResult.error) {
+        setMessage(registrationResult.error.message);
+      } else {
+        setRegistrations(registrationResult.data || []);
+      }
+
+      setCheckingLogin(false);
     }
 
-    setCheckingLogin(false);
-    loadEvents();
-    loadRegistrations();
+    void loadInitialData();
   }, [router]);
 
   async function loadEvents() {
@@ -88,8 +129,7 @@ export default function AdminEventsPage() {
   }
 
   async function refreshAll() {
-    await loadEvents();
-    await loadRegistrations();
+    await Promise.all([loadEvents(), loadRegistrations()]);
   }
 
   function handleChange(
@@ -97,10 +137,41 @@ export default function AdminEventsPage() {
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) {
-    setForm({
-      ...form,
+    setForm((currentForm) => ({
+      ...currentForm,
       [e.target.name]: e.target.value,
-    });
+    }));
+  }
+
+  function handleEditChange(
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) {
+    setEditForm((currentForm) => ({
+      ...currentForm,
+      [e.target.name]: e.target.value,
+    }));
+  }
+
+  async function uploadPoster(file: File) {
+    const fileExt = file.name.split(".").pop() || "jpg";
+    const safeFileName = `event-${Date.now()}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("event-posters")
+      .upload(safeFileName, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from("event-posters")
+      .getPublicUrl(safeFileName);
+
+    return data.publicUrl;
   }
 
   async function createEvent(e: React.FormEvent) {
@@ -110,26 +181,14 @@ export default function AdminEventsPage() {
     let posterUrl = "";
 
     if (posterFile) {
-      const fileExt = posterFile.name.split(".").pop() || "jpg";
-      const safeFileName = `event-${Date.now()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("event-posters")
-        .upload(safeFileName, posterFile, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-
-      if (uploadError) {
-        setMessage(uploadError.message);
+      try {
+        posterUrl = await uploadPoster(posterFile);
+      } catch (error) {
+        setMessage(
+          error instanceof Error ? error.message : "Poster upload failed."
+        );
         return;
       }
-
-      const { data } = supabase.storage
-        .from("event-posters")
-        .getPublicUrl(safeFileName);
-
-      posterUrl = data.publicUrl;
     }
 
     const { error } = await supabase.from("Events").insert({
@@ -151,17 +210,77 @@ export default function AdminEventsPage() {
 
     setMessage("Event created successfully.");
 
-    setForm({
-      title: "",
-      description: "",
-      location: "",
-      event_date: "",
-      event_time: "",
-      registration_deadline: "",
-      status: "Open",
-    });
+    setForm(emptyEventForm);
 
     setPosterFile(null);
+    await refreshAll();
+  }
+
+  function openEditEvent(event: Event) {
+    setEditingEvent(event);
+    setEditForm({
+      title: event.title,
+      description: event.description,
+      location: event.location,
+      event_date: event.event_date,
+      event_time: event.event_time,
+      registration_deadline: event.registration_deadline,
+      status: event.status,
+    });
+    setEditPosterFile(null);
+    setMessage("");
+  }
+
+  function closeEditEvent() {
+    setEditingEvent(null);
+    setEditPosterFile(null);
+  }
+
+  async function saveEvent(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (!editingEvent) return;
+
+    setSavingEdit(true);
+    setMessage("Saving event changes...");
+
+    let posterUrl = editingEvent.poster_url;
+
+    if (editPosterFile) {
+      try {
+        posterUrl = await uploadPoster(editPosterFile);
+      } catch (error) {
+        setMessage(
+          error instanceof Error ? error.message : "Poster upload failed."
+        );
+        setSavingEdit(false);
+        return;
+      }
+    }
+
+    const { error } = await supabase
+      .from("Events")
+      .update({
+        title: editForm.title,
+        description: editForm.description,
+        location: editForm.location,
+        event_date: editForm.event_date,
+        event_time: editForm.event_time,
+        registration_deadline: editForm.registration_deadline,
+        status: editForm.status,
+        poster_url: posterUrl,
+      })
+      .eq("id", editingEvent.id);
+
+    if (error) {
+      setMessage(error.message);
+      setSavingEdit(false);
+      return;
+    }
+
+    setMessage("Event updated successfully.");
+    setSavingEdit(false);
+    closeEditEvent();
     await refreshAll();
   }
 
@@ -455,11 +574,15 @@ export default function AdminEventsPage() {
                 <div className="grid gap-6 lg:grid-cols-5">
                   <div>
                     {event.poster_url ? (
-                      <img
-                        src={event.poster_url}
-                        alt={event.title}
-                        className="h-44 w-full rounded-2xl object-cover"
-                      />
+                      <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-gray-100">
+                        <Image
+                          src={event.poster_url}
+                          alt={event.title}
+                          fill
+                          sizes="(max-width: 1024px) 100vw, 20vw"
+                          className="object-contain"
+                        />
+                      </div>
                     ) : (
                       <div className="flex h-44 w-full items-center justify-center rounded-2xl bg-gray-100 font-bold text-gray-500">
                         No Poster
@@ -506,6 +629,13 @@ export default function AdminEventsPage() {
 
                   <div className="flex flex-col gap-3">
                     <button
+                      onClick={() => openEditEvent(event)}
+                      className="rounded-xl bg-blue-700 px-6 py-4 font-bold text-white hover:bg-blue-800"
+                    >
+                      Edit Event
+                    </button>
+
+                    <button
                       onClick={() => updateEventStatus(event, "Open")}
                       className="rounded-xl bg-green-700 px-6 py-4 font-bold text-white hover:bg-green-800"
                     >
@@ -545,6 +675,163 @@ export default function AdminEventsPage() {
           </div>
         </section>
       </div>
+
+      {editingEvent && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-8"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="edit-event-title"
+        >
+          <form
+            onSubmit={saveEvent}
+            className="max-h-full w-full max-w-3xl overflow-y-auto rounded-3xl bg-white p-8 shadow-2xl"
+          >
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <p className="mb-2 text-sm font-bold uppercase tracking-widest text-red-600">
+                  Event Management
+                </p>
+                <h2
+                  id="edit-event-title"
+                  className="text-3xl font-black text-gray-950"
+                >
+                  Edit Event
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeEditEvent}
+                disabled={savingEdit}
+                className="rounded-full bg-gray-100 px-4 py-2 font-black text-gray-950 hover:bg-gray-200"
+                aria-label="Close event editor"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="grid gap-2 font-bold text-gray-700">
+                Event title
+                <input
+                  name="title"
+                  value={editForm.title}
+                  onChange={handleEditChange}
+                  required
+                  className="rounded-xl border px-4 py-4 font-normal text-gray-950"
+                />
+              </label>
+
+              <label className="grid gap-2 font-bold text-gray-700">
+                Location
+                <input
+                  name="location"
+                  value={editForm.location}
+                  onChange={handleEditChange}
+                  required
+                  className="rounded-xl border px-4 py-4 font-normal text-gray-950"
+                />
+              </label>
+
+              <label className="grid gap-2 font-bold text-gray-700">
+                Event date
+                <input
+                  type="date"
+                  name="event_date"
+                  value={editForm.event_date}
+                  onChange={handleEditChange}
+                  required
+                  className="rounded-xl border px-4 py-4 font-normal text-gray-950"
+                />
+              </label>
+
+              <label className="grid gap-2 font-bold text-gray-700">
+                Event time
+                <input
+                  name="event_time"
+                  value={editForm.event_time}
+                  onChange={handleEditChange}
+                  required
+                  placeholder="e.g. 2:00 PM"
+                  className="rounded-xl border px-4 py-4 font-normal text-gray-950"
+                />
+              </label>
+
+              <label className="grid gap-2 font-bold text-gray-700">
+                Registration deadline
+                <input
+                  type="date"
+                  name="registration_deadline"
+                  value={editForm.registration_deadline}
+                  onChange={handleEditChange}
+                  required
+                  className="rounded-xl border px-4 py-4 font-normal text-gray-950"
+                />
+              </label>
+
+              <label className="grid gap-2 font-bold text-gray-700">
+                Status
+                <select
+                  name="status"
+                  value={editForm.status}
+                  onChange={handleEditChange}
+                  className="rounded-xl border px-4 py-4 font-normal text-gray-950"
+                >
+                  <option>Open</option>
+                  <option>Closed</option>
+                  <option>Hidden</option>
+                </select>
+              </label>
+            </div>
+
+            <label className="mt-4 grid gap-2 font-bold text-gray-700">
+              Event description
+              <textarea
+                name="description"
+                value={editForm.description}
+                onChange={handleEditChange}
+                required
+                className="h-36 rounded-xl border px-4 py-4 font-normal text-gray-950"
+              />
+            </label>
+
+            <label className="mt-4 grid gap-2 font-bold text-gray-700">
+              Replace event poster
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(event) =>
+                  setEditPosterFile(event.target.files?.[0] || null)
+                }
+                className="rounded-xl border bg-white px-4 py-4 font-normal text-gray-950"
+              />
+              <span className="text-sm font-normal text-gray-600">
+                Leave this empty to keep the current poster.
+              </span>
+            </label>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <button
+                type="submit"
+                disabled={savingEdit}
+                className="flex-1 rounded-xl bg-green-700 px-6 py-4 font-bold text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {savingEdit ? "Saving..." : "Save Changes"}
+              </button>
+
+              <button
+                type="button"
+                onClick={closeEditEvent}
+                disabled={savingEdit}
+                className="flex-1 rounded-xl bg-gray-200 px-6 py-4 font-bold text-gray-950 hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </main>
   );
 }
