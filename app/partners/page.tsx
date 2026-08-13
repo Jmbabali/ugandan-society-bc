@@ -4,6 +4,7 @@ const partners = [
   { name: "Tamutamu", logo: "/partners/tamutamu.jpeg", website: "https://www.tamutamu.co",},
   { name: "Bytewave Innovations Limited", logo: "/partners/bytewave.png", website: "https://bytewaveinnovations.ca",},
   { name: "Uganda BC Cranes Soccer Association", logo: "/partners/bccranes.webp", website: "https://ugandabccranes.ca/",},
+  { name: "National Alliance of Ugandan Canadian Associations", logo: "/partners/nauca.png", website: "https://nauca.ca/",},
 ];
 
 export default function PartnersPage() {

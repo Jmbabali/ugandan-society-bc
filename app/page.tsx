@@ -74,6 +74,11 @@ const partners = [
     logo: "/partners/bccranes.webp",
     website: "https://ugandabccranes.ca/",
   },
+  {
+    name: "National Alliance of Ugandan canadian Association",
+    logo: "/partners/nauca.png",
+    website: "https://nauca.ca/",
+  },
 ];
 
 const connectCards = [
