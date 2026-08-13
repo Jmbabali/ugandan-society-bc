@@ -81,6 +81,7 @@ export default function LeadershipGrid({
                   src={member.image}
                   alt={member.name}
                   fill
+                  quality={95}
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 20vw"
                   className="object-cover object-top transition duration-500 group-hover:scale-105"
                 />
@@ -141,6 +142,7 @@ export default function LeadershipGrid({
                     src={selectedMember.image}
                     alt={selectedMember.name}
                     fill
+                    quality={95}
                     sizes="280px"
                     className="object-cover object-top"
                   />
