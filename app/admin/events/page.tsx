@@ -8,10 +8,10 @@ import { supabase } from "@/lib/supabase";
 type Event = {
   id: number;
   title: string;
-  description: string;
   location: string;
   event_date: string;
   event_time: string;
+  event_link: string | null;
   registration_deadline: string;
   status: string;
   poster_url: string | null;
@@ -30,20 +30,20 @@ type EventRegistration = {
 
 type EventForm = {
   title: string;
-  description: string;
   location: string;
   event_date: string;
   event_time: string;
+  event_link: string;
   registration_deadline: string;
   status: string;
 };
 
 const emptyEventForm: EventForm = {
   title: "",
-  description: "",
   location: "",
   event_date: "",
   event_time: "",
+  event_link: "",
   registration_deadline: "",
   status: "Open",
 };
@@ -193,10 +193,11 @@ export default function AdminEventsPage() {
 
     const { error } = await supabase.from("Events").insert({
       title: form.title,
-      description: form.description,
+      description: "",
       location: form.location,
       event_date: form.event_date,
       event_time: form.event_time,
+      event_link: form.event_link.trim() || null,
       registration_deadline: form.registration_deadline,
       status: form.status,
       poster_url: posterUrl,
@@ -220,10 +221,10 @@ export default function AdminEventsPage() {
     setEditingEvent(event);
     setEditForm({
       title: event.title,
-      description: event.description,
       location: event.location,
       event_date: event.event_date,
       event_time: event.event_time,
+      event_link: event.event_link || "",
       registration_deadline: event.registration_deadline,
       status: event.status,
     });
@@ -262,10 +263,10 @@ export default function AdminEventsPage() {
       .from("Events")
       .update({
         title: editForm.title,
-        description: editForm.description,
         location: editForm.location,
         event_date: editForm.event_date,
         event_time: editForm.event_time,
+        event_link: editForm.event_link.trim() || null,
         registration_deadline: editForm.registration_deadline,
         status: editForm.status,
         poster_url: posterUrl,
@@ -506,6 +507,16 @@ export default function AdminEventsPage() {
             />
 
             <input
+              type="url"
+              name="event_link"
+              value={form.event_link}
+              onChange={handleChange}
+              required
+              placeholder="Event Link, e.g. https://example.com/event"
+              className="rounded-xl border px-4 py-4 text-gray-950"
+            />
+
+            <input
               type="date"
               name="registration_deadline"
               value={form.registration_deadline}
@@ -525,15 +536,6 @@ export default function AdminEventsPage() {
               <option>Hidden</option>
             </select>
           </div>
-
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            required
-            placeholder="Event Description"
-            className="mt-4 h-36 w-full rounded-xl border px-4 py-4 text-gray-950"
-          />
 
           <div className="mt-4">
             <label className="mb-2 block text-sm font-bold uppercase text-gray-500">
@@ -599,7 +601,21 @@ export default function AdminEventsPage() {
                       {event.title}
                     </h3>
 
-                    <p className="mt-2 text-gray-700">{event.description}</p>
+                    {event.event_link &&
+                    /^https?:\/\//i.test(event.event_link) ? (
+                      <a
+                        href={event.event_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-3 inline-block break-all font-bold text-blue-700 hover:underline"
+                      >
+                        {event.event_link}
+                      </a>
+                    ) : (
+                      <p className="mt-3 font-bold text-red-700">
+                        No event link added
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -759,6 +775,19 @@ export default function AdminEventsPage() {
               </label>
 
               <label className="grid gap-2 font-bold text-gray-700">
+                Event link
+                <input
+                  type="url"
+                  name="event_link"
+                  value={editForm.event_link}
+                  onChange={handleEditChange}
+                  required
+                  placeholder="https://example.com/event"
+                  className="rounded-xl border px-4 py-4 font-normal text-gray-950"
+                />
+              </label>
+
+              <label className="grid gap-2 font-bold text-gray-700">
                 Registration deadline
                 <input
                   type="date"
@@ -784,17 +813,6 @@ export default function AdminEventsPage() {
                 </select>
               </label>
             </div>
-
-            <label className="mt-4 grid gap-2 font-bold text-gray-700">
-              Event description
-              <textarea
-                name="description"
-                value={editForm.description}
-                onChange={handleEditChange}
-                required
-                className="h-36 rounded-xl border px-4 py-4 font-normal text-gray-950"
-              />
-            </label>
 
             <label className="mt-4 grid gap-2 font-bold text-gray-700">
               Replace event poster

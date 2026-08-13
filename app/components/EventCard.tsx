@@ -8,6 +8,7 @@ export type EventSummary = {
   location: string;
   event_date: string;
   event_time: string;
+  event_link: string | null;
   poster_url: string | null;
 };
 
@@ -26,8 +27,23 @@ function formatEventDate(value: string) {
   }).format(new Date(Date.UTC(year, month - 1, day)));
 }
 
+function getSafeEventLink(value: string | null) {
+  if (!value?.trim()) return null;
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:"
+      ? url.toString()
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function EventCard({ event }: EventCardProps) {
-  const eventHref = `/events/${event.id}`;
+  const externalEventLink = getSafeEventLink(event.event_link);
+  const eventHref = externalEventLink || `/events/${event.id}`;
+  const opensNewTab = Boolean(externalEventLink);
 
   return (
     <article className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-md transition hover:-translate-y-1 hover:shadow-xl">
@@ -35,6 +51,8 @@ export default function EventCard({ event }: EventCardProps) {
 
       <Link
         href={eventHref}
+        target={opensNewTab ? "_blank" : undefined}
+        rel={opensNewTab ? "noopener noreferrer" : undefined}
         aria-label={`View details for ${event.title}`}
         className="group relative block aspect-[4/5] overflow-hidden bg-gray-100"
       >
@@ -71,9 +89,11 @@ export default function EventCard({ event }: EventCardProps) {
 
         <Link
           href={eventHref}
+          target={opensNewTab ? "_blank" : undefined}
+          rel={opensNewTab ? "noopener noreferrer" : undefined}
           className="block rounded-xl bg-gray-950 px-6 py-4 text-center font-bold text-white transition hover:bg-gray-800"
         >
-          View Event →
+          Event Link →
         </Link>
       </div>
     </article>
