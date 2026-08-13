@@ -7,6 +7,7 @@ import { Users, Music, HeartHandshake, TrendingUp } from "lucide-react";
 import Stats from "./components/Stats";
 import WhyJoin from "./components/WhyJoin";
 import LatestUpdates from "./components/LatestUpdates";
+import UpcomingEvents from "./components/UpcomingEvents";
 
 const heroSlides = [
   {image: "/home/image1.jpg",},
@@ -119,7 +120,6 @@ export default function HomePage() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeAction, setActiveAction] = useState(0);
 
-  const slide = heroSlides[activeSlide];
   const action = actionSlides[activeAction];
   useEffect(() => {
   const heroTimer = setInterval(() => {
@@ -240,6 +240,8 @@ export default function HomePage() {
 
       <LatestUpdates/>
 
+      <UpcomingEvents />
+
       <section className="bg-slate-100 px-6 py-16">
         <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-3">
           <div>
@@ -358,9 +360,11 @@ export default function HomePage() {
                 rel="noopener noreferrer"
                 className="flex h-40 items-center justify-center rounded-3xl border bg-white p-8 shadow-lg transition hover:-translate-y-1 hover:shadow-xl"
               >
-                <img
+                <Image
                   src={partner.logo}
                   alt={partner.name}
+                  width={160}
+                  height={96}
                   className="max-h-24 max-w-full object-contain"
                 />
               </a>
