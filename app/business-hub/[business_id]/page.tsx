@@ -5,25 +5,48 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
+type BusinessProfile = {
+  business_name: string;
+  category: string | null;
+  description: string | null;
+  email: string | null;
+  location: string | null;
+  logo_url: string | null;
+  phone: string | null;
+  website: string | null;
+};
+
 export default function BusinessProfilePage() {
   const params = useParams();
   const businessId = params.business_id as string;
 
-  const [business, setBusiness] = useState<any>(null);
+  const [business, setBusiness] = useState<BusinessProfile | null>(null);
 
   useEffect(() => {
-    loadBusiness();
-  }, []);
+    async function loadBusiness() {
+      const { data: businessById } = await supabase
+        .from("Businesses")
+        .select("*")
+        .eq("id", businessId)
+        .maybeSingle();
 
-  async function loadBusiness() {
-    const { data } = await supabase
-      .from("Businesses")
-      .select("*")
-      .eq("business_id", businessId)
-      .single();
+      if (businessById) {
+        setBusiness(businessById);
+        return;
+      }
 
-    setBusiness(data);
-  }
+      const { data: businessByLegacyId } = await supabase
+        .from("Businesses")
+        .select("*")
+        .eq("business_id", businessId)
+        .limit(1)
+        .maybeSingle();
+
+      setBusiness(businessByLegacyId);
+    }
+
+    void loadBusiness();
+  }, [businessId]);
 
   if (!business) {
     return (
