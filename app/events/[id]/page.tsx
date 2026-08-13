@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -8,10 +9,10 @@ import { supabase } from "@/lib/supabase";
 type Event = {
   id: number;
   title: string;
-  description: string;
   location: string;
   event_date: string;
   event_time: string;
+  event_link: string | null;
   registration_deadline: string;
   status: string;
   poster_url: string | null;
@@ -26,25 +27,25 @@ export default function EventDetailsPage() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    loadEvent();
-  }, []);
+    async function loadEvent() {
+      const { data, error } = await supabase
+        .from("Events")
+        .select("*")
+        .eq("id", eventId)
+        .single();
 
-  async function loadEvent() {
-    const { data, error } = await supabase
-      .from("Events")
-      .select("*")
-      .eq("id", eventId)
-      .single();
+      if (error) {
+        setMessage("Event not found.");
+        setLoading(false);
+        return;
+      }
 
-    if (error) {
-      setMessage("Event not found.");
+      setEvent(data);
       setLoading(false);
-      return;
     }
 
-    setEvent(data);
-    setLoading(false);
-  }
+    void loadEvent();
+  }, [eventId]);
 
   if (loading) {
     return (
@@ -77,6 +78,10 @@ export default function EventDetailsPage() {
     );
   }
 
+  const safeEventLink = /^https?:\/\//i.test(event.event_link || "")
+    ? event.event_link
+    : null;
+
   return (
     <main className="min-h-screen bg-gray-100">
       <section className="bg-gray-950 px-6 pb-16 pt-32 text-white">
@@ -99,11 +104,15 @@ export default function EventDetailsPage() {
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2">
           <div className="overflow-hidden rounded-3xl bg-white shadow-premium">
             {event.poster_url ? (
-              <img
-                src={event.poster_url}
-                alt={event.title}
-                className="w-full"
-              />
+              <div className="relative aspect-[4/5] w-full bg-gray-100">
+                <Image
+                  src={event.poster_url}
+                  alt={event.title}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-contain"
+                />
+              </div>
             ) : (
               <div className="flex h-96 items-center justify-center bg-gray-200 font-bold text-gray-500">
                 No Event Poster
@@ -119,10 +128,6 @@ export default function EventDetailsPage() {
             <h2 className="mb-4 text-4xl font-black text-gray-950">
               {event.title}
             </h2>
-
-            <p className="mb-8 text-lg text-gray-700">
-              {event.description}
-            </p>
 
             <div className="space-y-4 border-t pt-6 text-gray-700">
               <p>
@@ -144,6 +149,17 @@ export default function EventDetailsPage() {
             </div>
 
             <div className="mt-8 grid gap-4">
+              {safeEventLink && (
+                <a
+                  href={safeEventLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-xl bg-red-600 px-8 py-4 text-center font-bold text-white hover:bg-red-700"
+                >
+                  Open Event Link
+                </a>
+              )}
+
               <Link
                 href={`/events/${event.id}/register`}
                 className="rounded-xl bg-gray-950 px-8 py-4 text-center font-bold text-white hover:bg-gray-800"

@@ -12,7 +12,9 @@ export default function EventsPage() {
     async function loadEvents() {
       const { data, error } = await supabase
         .from("Events")
-        .select("id, title, location, event_date, event_time, poster_url")
+        .select(
+          "id, title, location, event_date, event_time, event_link, poster_url"
+        )
         .eq("status", "Open")
         .order("event_date", { ascending: true });
 
